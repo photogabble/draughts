@@ -346,7 +346,7 @@ class Draughts
      * @param array $values
      * @return array
      */
-    private function setheader(array $values = []) : array
+    private function setHeader(array $values = []) : array
     {
         foreach($values as $key => $value) {
             $this->header[$key] = $value;
@@ -402,9 +402,38 @@ class Draughts
         // @todo
     }
 
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L868
+     */
     public function undo()
     {
-        // @todo
+        if (!$old = array_pop($this->history)){
+            return null;
+        }
+
+        $move = $old->move;
+        $this->turn = $old->turn;
+        $this->moveNumber = $old->moveNumber;
+
+        $this->position = $this->setCharAr($this->position, $this->convertNumber((int) $move->from, 'internal'), $move->piece);
+        $this->position = $this->setCharAr($this->position, $this->convertNumber((int) $move->to, 'internal'), 0);
+
+        if ($move->flags === 'c') {
+            for ($i = 0; $i < count($move->captures); $i++){ // @todo PORT: is captures a string or array?
+                $this->position = $this->setCharAr($this->position, $this->convertNumber((int) $move->captures[$i], 'internal'), $move->piecesCaptured[$i]);
+            }
+        }
+
+        if ($move->flags === 'p') {
+            if (! empty($move->captures)){
+                for ($i = 0; $i < count($move->captures); $i++){
+                    $this->position = $this->setCharAr($this->position, $this->convertNumber((int) $move->captures[$i], 'internal'), $move->piecesCaptured[$i]);
+                }
+            }
+            $this->position = $this->setCharAr($this->position, $this->convertNumber((int) $move->from, 'internal'), strtolower($move->piece));
+        }
+
+        return $move;
     }
 
     public function put($piece, $square)
@@ -437,9 +466,23 @@ class Draughts
         // @todo
     }
 
-    public function convertNumber()
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L955
+     * @param int $number
+     * @param string $notation
+     * @return int
+     */
+    public function convertNumber(int $number, string $notation): int
     {
-        // @todo
+        if ($notation === 'internal') {
+            return $number + floor(($number - 1) / 10);
+        }
+
+        if ($notation === 'external') {
+            return $number - floor(($number - 1)/ 11);
+        }
+
+        return $number;
     }
 
     /**
