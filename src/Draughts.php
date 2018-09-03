@@ -56,7 +56,7 @@ class Draughts
     private $moveNumber = 1;
 
     /**
-     * @var array|Move[]
+     * @var array|History[]
      */
     private $history = [];
 
@@ -123,10 +123,10 @@ class Draughts
         $externalPosition = $this->defaultPositionExternal;
 
         for ($i = 1; $i <= strlen($externalPosition); $i++) {
-            $externalPosition = $this->setCharAr($externalPosition, 1, 0);
+            $externalPosition = $this->setCharAt($externalPosition, 1, 0);
         }
 
-        $externalPosition = $this->setCharAr($externalPosition, 0, $this->turn);
+        $externalPosition = $this->setCharAt($externalPosition, 0, $this->turn);
 
         // @todo refactor
         for ($k = 1; $k <= 2; $k++) {
@@ -146,11 +146,11 @@ class Draughts
                     $from = (int)$range[0];
                     $to = (int)$range[1];
                     for ($j = $from; $j <= $to; $j++) {
-                        $externalPosition = $this->setCharAr($externalPosition, $j, ($isKing === true ? strtoupper($colour) : strtolower($colour)));
+                        $externalPosition = $this->setCharAt($externalPosition, $j, ($isKing === true ? strtoupper($colour) : strtolower($colour)));
                     }
                 } else {
                     $numSquare = (int)$numSquare;
-                    $externalPosition = $this->setCharAr($externalPosition, $numSquare, ($isKing === true ? strtoupper($colour) : strtolower($colour)));
+                    $externalPosition = $this->setCharAt($externalPosition, $numSquare, ($isKing === true ? strtoupper($colour) : strtolower($colour)));
                 }
             }
         }
@@ -194,7 +194,7 @@ class Draughts
      * @param string $chr
      * @return string
      */
-    private function setCharAr(string $position, int $idx, string $chr): string
+    private function setCharAt(string $position, int $idx, string $chr): string
     {
         if ($idx > strlen($position) - 1) {
             return $position;
@@ -211,10 +211,47 @@ class Draughts
         $this->load($this->defaultFEN);
     }
 
-    public function moves()
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L860
+     * @param Move $move
+     */
+    public function push(Move $move)
     {
-        // @todo
+        array_push($this->history, new History($move, $this->turn, $this->moveNumber));
     }
+
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L643
+     * @param null $square
+     * @return Move[]
+     */
+    public function moves($square=null)
+    {
+        $moves = [];
+
+        if (!is_null($square)){
+            $moves = $this->getLegalMoves($square->square);
+        } else {
+            /** @var Move[] $tmpCaptures */
+            $tmpCaptures = $this->getCaptures(); // @todo make sure these are cloned objects....
+            if (count($tmpCaptures) > 0) {
+                // TODO change to be applicable to array
+                foreach ($tmpCaptures as &$capture) {
+                    $capture->flags = self::FLAG_CAPTURE;
+                    $capture->captures = $capture->jumps;
+                    $capture->piecesCaptured = $capture->piecesTaken;
+                } unset ($capture);
+                return $tmpCaptures;
+            }
+            $moves = $this->getMoves();
+        }
+
+        // TODO returns [] for on hovering for square no
+        // moves = [].concat.apply([], moves)
+        return $moves;
+    }
+
+
 
     public function gameOver()
     {
@@ -290,7 +327,7 @@ class Draughts
         $moveNumber = 1;
 
         while (count($tmpHistory) > 0) {
-            /** @var Move $move */
+            /** @var History $move */
             $move = array_shift($tmpHistory);
             if ($move->turn === 'W') {
                 $moveString .= $moveNumber . '. ';
@@ -397,7 +434,30 @@ class Draughts
         // @todo
     }
 
-    public function getLegalMoves()
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L666
+     * @param int $index
+     */
+    public function getLegalMoves(int $index)
+    {
+        $index = $this->convertNumber($index, 'internal');
+        $captures = $this->capturesAtSquare($index, ['position' => $this->position, 'dirFrom' => ''], ['jumps' => [$index], 'takes' => [], 'piecesTaken' => []]);
+        $captures= $this->longestCapture($captures);
+        $legalMoves = $captures;
+        if (count($legalMoves) === 0) {
+            $legalMoves = $this->movesAtSquare($index);
+        }
+
+        return $this->convertMoves($legalMoves, 'external');
+    }
+
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L769
+     * @param $posFrom
+     * @param $state
+     * @param $capture
+     */
+    private function capturesAtSquare($posFrom, $state, $capture)
     {
         // @todo
     }
@@ -415,22 +475,22 @@ class Draughts
         $this->turn = $old->turn;
         $this->moveNumber = $old->moveNumber;
 
-        $this->position = $this->setCharAr($this->position, $this->convertNumber((int) $move->from, 'internal'), $move->piece);
-        $this->position = $this->setCharAr($this->position, $this->convertNumber((int) $move->to, 'internal'), 0);
+        $this->position = $this->setCharAt($this->position, $this->convertNumber((int) $move->from, 'internal'), $move->piece);
+        $this->position = $this->setCharAt($this->position, $this->convertNumber((int) $move->to, 'internal'), 0);
 
         if ($move->flags === 'c') {
             for ($i = 0; $i < count($move->captures); $i++){ // @todo PORT: is captures a string or array?
-                $this->position = $this->setCharAr($this->position, $this->convertNumber((int) $move->captures[$i], 'internal'), $move->piecesCaptured[$i]);
+                $this->position = $this->setCharAt($this->position, $this->convertNumber((int) $move->captures[$i], 'internal'), $move->piecesCaptured[$i]);
             }
         }
 
         if ($move->flags === 'p') {
             if (! empty($move->captures)){
                 for ($i = 0; $i < count($move->captures); $i++){
-                    $this->position = $this->setCharAr($this->position, $this->convertNumber((int) $move->captures[$i], 'internal'), $move->piecesCaptured[$i]);
+                    $this->position = $this->setCharAt($this->position, $this->convertNumber((int) $move->captures[$i], 'internal'), $move->piecesCaptured[$i]);
                 }
             }
-            $this->position = $this->setCharAr($this->position, $this->convertNumber((int) $move->from, 'internal'), strtolower($move->piece));
+            $this->position = $this->setCharAt($this->position, $this->convertNumber((int) $move->from, 'internal'), strtolower($move->piece));
         }
 
         return $move;

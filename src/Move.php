@@ -8,18 +8,12 @@ namespace Photogabble\Draughts;
  */
 class Move
 {
-    /**
-     * @var
-     */
-    public $move;
-
-    /**
-     * @var string
-     */
-    public $turn;
-
-    /**
-     * @var int
-     */
-    public $moveNumber;
+    public $from;
+    public $to;
+    public $flags;
+    public $piece;
+    public $captures = [];
+    public $piecesCaptured = [];
+    public $jumps = [];
+    public $piecesTaken = [];
 }
