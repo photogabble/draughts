@@ -59,7 +59,13 @@ class Draughts
 
     private $header = [];
 
-    public function __construct($fen = null)
+    /**
+     * Draughts constructor.
+     *
+     * @param string|null $fen
+     * @throws \Exception
+     */
+    public function __construct(string $fen = null)
     {
         $this->position = $this->defaultPositionInternal;
         $this->load(is_null($fen) ? $this->defaultFEN : $fen);
@@ -95,7 +101,7 @@ class Draughts
         // fen_constants(dimension) //TODO for empty fens
 
         $checkedFen = $this->validateFen($fen);
-        if (!$checkedFen->valid) {
+        if (!$checkedFen->isValid()) {
             throw new \Exception($checkedFen->error);
         }
 

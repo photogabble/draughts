@@ -37,24 +37,77 @@ class FenValidator
         $this->fen = preg_replace('/\..*$/', '', $this->fen);
 
         if ($this->fen === '') {
-            $this->error = 'squares of fen position not valid';
+            $this->error = $this->errors[7];
             return;
         }
 
         if (substr($this->fen, 1, 1) !== ':') {
-            $this->error = 'fen position has not colon at second position';
+            $this->error = $this->errors[2];
             return;
         }
 
         // fen should be 3 sections separated by colons
         $parts = explode(':', $this->fen);
         if (count($parts) !== 3) {
-            $this->error = 'fen position has not 2 colons';
+            $this->error = $this->errors[2];
             return;
         }
 
-        // @todo
+        //  which side to move
+        $turnColour = $parts[0];
+        if (!in_array($turnColour, ['B', 'W', '?'])) {
+            $this->error = $this->errors[5];
+            return;
+        }
 
+        // check colors of both sides
+        $colours = substr($parts[1], 0, 1) . substr($parts[2], 0, 1);
+        if (!in_array($colours, ['BW', 'WB'])) {
+            $this->error = $this->errors[4];
+            return;
+        }
+
+        // check parts for both sides
+        for ($k = 1; $k <= 2; $k += 1) {
+            $sideString = substr($parts[$k], 1); // Stripping color
+            if (strlen($sideString) === 0) {
+                continue;
+            }
+
+            $numbers = explode(',', $sideString);
+            for ($i = 0; $i < count($numbers); $i++) {
+                $numSquare = $numbers[$i];
+                $isKing = substr($numSquare, 0, 1) === 'K';
+                $numSquare = ($isKing === true ? substr($numSquare, 1) : $numSquare);
+
+                $range = explode('-', $numSquare);
+                if (count($range) === 2) {
+                    if (!is_numeric($range[0])) {
+                        $this->error = $this->errors[5];
+                        return;
+                    }
+                    if (!($range[0] >= 1 && $range[0] <= 100)) {
+                        $this->error = $this->errors[6];
+                        return;
+                    }
+                    if (!is_numeric($range[1])) {
+                        $this->error = $this->errors[5];
+                        return;
+                    }
+                    if (!($range[1] >= 1 && $range[1] <= 100)) {
+                        $this->error = $this->errors[6];
+                        return;
+                    }
+                } else {
+                    if (!is_numeric($numSquare)) {
+                        $this->error = $this->errors[5];
+                    }
+                    if (!($numSquare >= 1 && $numSquare <= 100)) {
+                        $this->error = $this->errors[6];
+                    }
+                }
+            }
+        }
     }
 
     public function isValid()
