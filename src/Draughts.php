@@ -355,9 +355,16 @@ class Draughts
         return $this->header;
     }
 
-    public function loadPDN($pdn)
+    /**
+     * This looks not to be implemented in the js source.
+     *
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1182
+     * @param string $pdn
+     * @param array $options
+     */
+    public function loadPDN(string $pdn, array $options = [])
     {
-        // @todo
+        // ...
     }
 
     public function parsePDN()
