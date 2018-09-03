@@ -65,14 +65,51 @@ class Draughts
         $this->load(is_null($fen) ? $this->defaultFEN : $fen);
     }
 
-    public function load($fen)
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L113
+     */
+    public function clear()
     {
+        $this->position = $this->defaultPositionInternal;
+        $this->turn = self::WHITE;
+        $this->moveNumber = 1;
+        $this->history = [];
+        $this->header = [];
+        // @todo update_setup(generate_fen())
+    }
+
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L126
+     * @param null $fen
+     * @return bool
+     * @throws \Exception
+     */
+    public function load($fen = null)
+    {
+        if (is_null($fen) || $fen === $this->defaultFEN){
+            $this->position = $this->defaultPositionInternal;
+            // @todo update_setup(generate_fen(position))
+            return true;
+        }
+
+        // fen_constants(dimension) //TODO for empty fens
+
+        $checkedFen = $this->validateFen($fen);
+        if (!$checkedFen->valid) {
+            throw new \Exception($checkedFen->error);
+        }
+
+        $this->clear();
+
         // @todo
     }
 
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L122
+     */
     public function reset()
     {
-        // @todo
+        $this->load($this->defaultFEN);
     }
 
     public function moves()
@@ -90,9 +127,13 @@ class Draughts
         // @todo
     }
 
-    public function validateFen($fen)
+    /**
+     * @param string $fen
+     * @return FenValidator
+     */
+    public function validateFen(string $fen): FenValidator
     {
-        // @todo
+        return new FenValidator($fen);
     }
 
     public function generateFen()
@@ -146,11 +187,6 @@ class Draughts
     }
 
     public function undo()
-    {
-        // @todo
-    }
-
-    public function clear()
     {
         // @todo
     }
