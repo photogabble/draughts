@@ -4,10 +4,65 @@ namespace Photogabble\Draughts;
 
 class Draughts
 {
+    const BLACK = 'B';
+    const WHITE = 'W';
+    const MAN = 'b';
+    const KING = 'w';
+    const FLAG_NORMAL = 'n';
+    const FLAG_CAPTURE = 'c';
+    const FLAG_PROMOTION = 'p';
+    const SQUARES = 'A8';
 
-    public function __construct()
+    private $symbols = 'bwBW';
+
+    private $defaultFEN = 'W:W31-50:B1-20';
+
+    private $position;
+
+    private $defaultPositionInternal = '-bbbbbbbbbb-bbbbbbbbbb-0000000000-wwwwwwwwww-wwwwwwwwww-';
+
+    private $defaultPositionExternal = 'Wbbbbbbbbbbbbbbbbbbbb0000000000wwwwwwwwwwwwwwwwwwww';
+
+    private $steps = [
+        'NE' => -5,
+        'SE' => 6,
+        'SW' => 5,
+        'NW' => -6
+    ];
+
+    private $possibleResults = ['2-0', '0-2', '1-1', '0-0', '*', '1-0', '0-1'];
+
+    private $unicodes = [
+        'w' => '\u26C0',
+        'b' => '\u26C2',
+        'B' => '\u26C3',
+        'W' => '\u26C1',
+        '0' => '\u0020\u0020'
+    ];
+
+    private $signs = [
+        'n' => '-',
+        'c' => 'x'
+    ];
+
+    private $bits = [
+        'NORMAL' => 1,
+        'CAPTURE' => 2,
+        'PROMOTION' => 4
+    ];
+
+    private $turn = self::WHITE;
+
+    private $moveNumber = 1;
+
+    private $history = [];
+
+    private $header = [];
+
+    public function __construct($fen = null)
     {
-        // @todo
+        $this->position = $this->defaultPositionInternal;
+        $this->load(is_null($fen) ? $this->defaultFEN : $fen);
     }
 
     public function load($fen)
@@ -145,31 +200,38 @@ class Draughts
         // @todo
     }
 
-    public function directionStrings(){
+    public function directionStrings()
+    {
         // @todo
     }
 
-    public function oppositeDir(){
+    public function oppositeDir()
+    {
         // @todo
     }
 
-    public function validDir(){
+    public function validDir()
+    {
         // @todo
     }
 
-    public function position(){
+    public function position()
+    {
         // @todo
     }
 
-    public function makeClone(){
+    public function makeClone()
+    {
         // @todo
     }
 
-    public function makePretty(){
+    public function makePretty()
+    {
         // @todo
     }
 
-    public function captures(){
+    public function captures()
+    {
         // @todo
     }
 }
