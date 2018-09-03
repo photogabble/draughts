@@ -341,6 +341,20 @@ class Draughts
         return implode('', $result);
     }
 
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L404
+     * @param array $values
+     * @return array
+     */
+    private function setheader(array $values = []) : array
+    {
+        foreach($values as $key => $value) {
+            $this->header[$key] = $value;
+        }
+
+        return $this->header;
+    }
+
     public function loadPDN($pdn)
     {
         // @todo
