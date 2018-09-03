@@ -55,6 +55,9 @@ class Draughts
 
     private $moveNumber = 1;
 
+    /**
+     * @var array|Move[]
+     */
     private $history = [];
 
     private $header = [];
@@ -259,9 +262,83 @@ class Draughts
         return strtoupper($this->turn) . ':W' . implode(',', $white) . ':B' . implode(',', $black);
     }
 
-    public function generatePDN()
+    /**
+     * @todo replace $options with two arguments
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L331
+     * @param array|null $options
+     * @return string
+     */
+    public function generatePDN(array $options = null)
     {
-        // @todo
+        $newLine = (is_array($options) && isset($options['newline_char'])) ? $options['newline_char'] : "\n";
+        $maxWidth = (is_array($options) && isset($options['maxWidth'])) ? $options['maxWidth'] : 0;
+        $result = [];
+        $headerExists = false;
+
+        foreach($this->header as $i => $header) {
+            array_push($result, sprintf('[%d "%s"]', $i, $header).$newLine);
+            $headerExists = true;
+        }
+
+        if ($headerExists === true && count($this->history) > 0) {
+            array_push($result, $newLine);
+        }
+
+        $tmpHistory = $this->history;
+        $moves = [];
+        $moveString = '';
+        $moveNumber = 1;
+
+        while (count($tmpHistory) > 0) {
+            /** @var Move $move */
+            $move = array_shift($tmpHistory);
+            if ($move->turn === 'W') {
+                $moveString .= $moveNumber . '. ';
+            }
+            $moveString .= $move->move->from;
+
+            if ($move->move->flags === 'c') {
+                $moveString .= 'x';
+            } else {
+                $moveString .= '-';
+            }
+
+            $moveString .= $move->move->to;
+            $moveString .= ' ';
+            $moveNumber++;
+        }
+
+        if (strlen($moveString) > 0){
+            array_push($moves, $moveString);
+        }
+
+        // @todo result from pdn or header??
+        if (isset($this->header['Result'])) {
+            array_push($moves, $this->header['Result']);
+        }
+
+        if ($maxWidth === 0) {
+            return implode('', $result) . implode('', $moves);
+        }
+
+        $currentWidth = 0;
+        for ($i = 0; $i< count($moves); $i++) {
+            if ($currentWidth + strlen($moves[$i]) > $maxWidth && $i !== 0) {
+                if ($result[count($result) - 1] === ' ') {
+                    array_pop($result);
+                }
+
+                array_push($result, $newLine);
+                $currentWidth = 0;
+            } else if ($i !== 0) {
+                array_push($result, ' ');
+                $currentWidth++;
+            }
+            array_push($result, ' ');
+            $currentWidth += strlen($moves[$i]);
+        }
+
+        return implode('', $result);
     }
 
     public function loadPDN($pdn)
@@ -395,11 +472,6 @@ class Draughts
     }
 
     public function position()
-    {
-        // @todo
-    }
-
-    public function makeClone()
     {
         // @todo
     }
