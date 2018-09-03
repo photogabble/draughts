@@ -8,7 +8,26 @@ use PHPUnit\Framework\TestCase;
 class DraughtsTest extends TestCase
 {
 
-    public function perftTest()
+    public function testAscii()
+    {
+        $expected = "\n+------------------------------+\n".
+                    "|\t   b   b   b   b   b  \t|\n".
+                    "|\t b   b   b   b   b    \t|\n".
+                    "|\t   b   b   b   b   b  \t|\n".
+                    "|\t b   b   b   b   b    \t|\n".
+                    "|\t   0   0   0   0   0  \t|\n".
+                    "|\t 0   0   0   0   0    \t|\n".
+                    "|\t   w   w   w   w   w  \t|\n".
+                    "|\t w   w   w   w   w    \t|\n".
+                    "|\t   w   w   w   w   w  \t|\n".
+                    "|\t w   w   w   w   w    \t|\n".
+                    "+------------------------------+\n";
+        $draughts = new Draughts();
+        $this->assertEquals($expected, $draughts->ascii());
+        $n =1;
+    }
+
+    public function testPerft()
     {
         $perfts = [];
 
@@ -20,7 +39,7 @@ class DraughtsTest extends TestCase
         }
     }
 
-    public function singleSquareMoveGenerationTest()
+    public function testSingleSquareMoveGeneration()
     {
         $positions = [];
 
@@ -45,7 +64,7 @@ class DraughtsTest extends TestCase
         }
     }
 
-    public function insufficientMaterialTest()
+    public function testInsufficientMaterial()
     {
         $positions = [];
 
@@ -61,7 +80,7 @@ class DraughtsTest extends TestCase
         }
     }
 
-    public function threefoldRepetitionTest()
+    public function testThreefoldRepetition()
     {
         $positions = [];
 
@@ -81,30 +100,30 @@ class DraughtsTest extends TestCase
         }
     }
 
-    public function getPutRemoveTest()
+    public function testGetPutRemove()
     {
         $draughts = new Draughts();
         // @todo
     }
 
-    public function FENTest()
+    public function testFEN()
     {
         $positions = [];
 
         foreach ($positions as $position) {
             $draughts = new Draughts();
             $draughts->load($position['fen']);
-            $this->assertEquals($position['should_pass'], $draughts->fen == $position['fen']);
+            $this->assertEquals($position['should_pass'], $draughts->fen() == $position['fen']);
         }
     }
 
-    public function loadFENTest()
+    public function testLoadFEN()
     {
         $draughts = new Draughts();
         // @todo
     }
 
-    public function makeMoveTest()
+    public function testMakeMove()
     {
         $positions = [];
 
@@ -116,7 +135,7 @@ class DraughtsTest extends TestCase
         }
     }
 
-    public function historyTest()
+    public function testHistory()
     {
         $draughts = new Draughts();
         // @todo

@@ -225,11 +225,11 @@ class Draughts
      * @param null $square
      * @return Move[]
      */
-    public function moves($square=null)
+    public function moves($square = null)
     {
         $moves = [];
 
-        if (!is_null($square)){
+        if (!is_null($square)) {
             $moves = $this->getLegalMoves($square->square);
         } else {
             /** @var Move[] $tmpCaptures */
@@ -240,7 +240,8 @@ class Draughts
                     $capture->flags = self::FLAG_CAPTURE;
                     $capture->captures = $capture->jumps;
                     $capture->piecesCaptured = $capture->piecesTaken;
-                } unset ($capture);
+                }
+                unset ($capture);
                 return $tmpCaptures;
             }
             $moves = $this->getMoves();
@@ -251,16 +252,34 @@ class Draughts
         return $moves;
     }
 
-
-
-    public function gameOver()
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1080
+     * @return bool
+     */
+    public function gameOver(): bool
     {
-        // @todo
+        // First check if any piece left
+        for ($i = 0; $i < strlen($this->position); $i++) {
+            if (strtolower($this->position[$i]) === strtolower($this->turn)) {
+                // if moves left game not over
+                return count($this->generateMoves()) === 0;
+            }
+        }
+        return true;
     }
 
+
+    /**
+     * Returns true or false if the game is drawn (50-move rule or insufficient material).
+     *
+     * Looks like the source library hard coded this.
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1172
+     * @todo finish this?
+     * @return bool
+     */
     public function inDraw()
     {
-        // @todo
+        return false;
     }
 
     /**
@@ -312,8 +331,8 @@ class Draughts
         $result = [];
         $headerExists = false;
 
-        foreach($this->header as $i => $header) {
-            array_push($result, sprintf('[%d "%s"]', $i, $header).$newLine);
+        foreach ($this->header as $i => $header) {
+            array_push($result, sprintf('[%d "%s"]', $i, $header) . $newLine);
             $headerExists = true;
         }
 
@@ -345,7 +364,7 @@ class Draughts
             $moveNumber++;
         }
 
-        if (strlen($moveString) > 0){
+        if (strlen($moveString) > 0) {
             array_push($moves, $moveString);
         }
 
@@ -359,7 +378,7 @@ class Draughts
         }
 
         $currentWidth = 0;
-        for ($i = 0; $i< count($moves); $i++) {
+        for ($i = 0; $i < count($moves); $i++) {
             if ($currentWidth + strlen($moves[$i]) > $maxWidth && $i !== 0) {
                 if ($result[count($result) - 1] === ' ') {
                     array_pop($result);
@@ -379,13 +398,44 @@ class Draughts
     }
 
     /**
+     * @param null $square
+     * @return array|Move[]
+     */
+    private function generateMoves($square = null): array
+    {
+        if (!is_null($square)) {
+            $moves = $this->getLegalMoves($square->square);
+        } else {
+            $tempCaptures = $this->getCaptures();
+            // TODO change to be applicable to array
+            if (count($tempCaptures) > 0) {
+                foreach ($tempCaptures as &$capture) {
+                    $capture->flags = self::FLAG_CAPTURE;
+                    $capture->captures = $capture->jumps;
+                    $capture->piecesCaptures = $capture->piecesTaken;
+                }
+                unset ($capture);
+
+                return $tempCaptures;
+            }
+            $moves = $this->getMoves();
+        }
+
+        // TODO returns [] for on hovering for square no
+        // moves = [].concat.apply([], moves)
+        // @todo port the above line that flattens an array
+
+        return $moves;
+    }
+
+    /**
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L404
      * @param array $values
      * @return array
      */
-    private function setHeader(array $values = []) : array
+    private function setHeader(array $values = []): array
     {
-        foreach($values as $key => $value) {
+        foreach ($values as $key => $value) {
             $this->header[$key] = $value;
         }
 
@@ -414,35 +464,93 @@ class Draughts
         // @todo
     }
 
-    public function ascii()
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1050
+     * @param bool $unicode
+     * @return string
+     */
+    public function ascii(bool $unicode = false): string
     {
-        // @todo
+        $extPosition = $this->convertPosition($this->position, 'external');
+        $s = "\n+------------------------------+\n";
+        $i = 1;
+        for ($row = 1; $row <= 10; $row++) {
+            $s .= "|\t";
+            if ($row % 2 !== 0) {
+                $s .= '  ';
+            }
+            for ($col = 1; $col <= 10; $col++) {
+                if ($col % 2 === 0) {
+                    $s .= '  ';
+                    $i++;
+                } else {
+                    if ($unicode === true) {
+                        $s .= ' ' . $this->unicodes[$extPosition[$i]];
+                    } else {
+                        $s .= ' ' . $extPosition[$i];
+                    }
+                }
+            }
+            if ($row % 2 === 0) {
+                $s .= '  ';
+            }
+            $s .= "\t|\n";
+        }
+        $s .= "+------------------------------+\n";
+        return $s;
     }
 
-    public function turn()
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1192
+     * @return string
+     */
+    public function turn(): string
     {
-        // @todo
+        return strtolower($this->turn);
     }
 
-    public function move($move)
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1196
+     * @param Move $move
+     * @return Move
+     */
+    public function move(Move $move): Move
     {
-        // @todo
+        $moves = $this->generateMoves();
+        for ($i = 0; $i < count($moves); $i++) {
+            if (($move->to === $moves[$i]->to) && ($move->from === $moves[$i]->from)) {
+                $this->makeMove($moves[$i]);
+                return $moves[$i];
+            }
+        }
     }
 
-    public function getMoves()
+    public function getMoves($index)
     {
-        // @todo
+        $moves = [];
+        $us = $this->turn;
+
+        for ($i = 1; $i < strlen($this->position); $i++) {
+            if ($this->position[$i] === $us || $this->position[$i] === strtolower($us)) {
+                $tempMoves = $this->movesAtSquare($i);
+                if (count($tempMoves) > 0) {
+                    $moves = array_merge($moves, $this->convertMoves($tempMoves, 'external'));
+                }
+            }
+        }
+        return $moves;
     }
 
     /**
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L666
      * @param int $index
+     * @return array
      */
     public function getLegalMoves(int $index)
     {
         $index = $this->convertNumber($index, 'internal');
         $captures = $this->capturesAtSquare($index, ['position' => $this->position, 'dirFrom' => ''], ['jumps' => [$index], 'takes' => [], 'piecesTaken' => []]);
-        $captures= $this->longestCapture($captures);
+        $captures = $this->longestCapture($captures);
         $legalMoves = $captures;
         if (count($legalMoves) === 0) {
             $legalMoves = $this->movesAtSquare($index);
@@ -467,7 +575,7 @@ class Draughts
      */
     public function undo()
     {
-        if (!$old = array_pop($this->history)){
+        if (!$old = array_pop($this->history)) {
             return null;
         }
 
@@ -475,30 +583,48 @@ class Draughts
         $this->turn = $old->turn;
         $this->moveNumber = $old->moveNumber;
 
-        $this->position = $this->setCharAt($this->position, $this->convertNumber((int) $move->from, 'internal'), $move->piece);
-        $this->position = $this->setCharAt($this->position, $this->convertNumber((int) $move->to, 'internal'), 0);
+        $this->position = $this->setCharAt($this->position, $this->convertNumber((int)$move->from, 'internal'), $move->piece);
+        $this->position = $this->setCharAt($this->position, $this->convertNumber((int)$move->to, 'internal'), 0);
 
         if ($move->flags === 'c') {
-            for ($i = 0; $i < count($move->captures); $i++){ // @todo PORT: is captures a string or array?
-                $this->position = $this->setCharAt($this->position, $this->convertNumber((int) $move->captures[$i], 'internal'), $move->piecesCaptured[$i]);
+            for ($i = 0; $i < count($move->captures); $i++) { // @todo PORT: is captures a string or array?
+                $this->position = $this->setCharAt($this->position, $this->convertNumber((int)$move->captures[$i], 'internal'), $move->piecesCaptured[$i]);
             }
         }
 
         if ($move->flags === 'p') {
-            if (! empty($move->captures)){
-                for ($i = 0; $i < count($move->captures); $i++){
-                    $this->position = $this->setCharAt($this->position, $this->convertNumber((int) $move->captures[$i], 'internal'), $move->piecesCaptured[$i]);
+            if (!empty($move->captures)) {
+                for ($i = 0; $i < count($move->captures); $i++) {
+                    $this->position = $this->setCharAt($this->position, $this->convertNumber((int)$move->captures[$i], 'internal'), $move->piecesCaptured[$i]);
                 }
             }
-            $this->position = $this->setCharAt($this->position, $this->convertNumber((int) $move->from, 'internal'), strtolower($move->piece));
+            $this->position = $this->setCharAt($this->position, $this->convertNumber((int)$move->from, 'internal'), strtolower($move->piece));
         }
 
         return $move;
     }
 
-    public function put($piece, $square)
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L598
+     * @param string $piece
+     * @param int $square
+     * @return bool
+     */
+    public function put(string $piece, int $square): bool
     {
-        // @todo
+        // check for valid piece string
+        if (strpos($this->symbols, $piece) === false) {
+            return false;
+        }
+
+        // check for valid square
+        if ($this->outsideBoard($this->convertNumber($square, 'internal')) === false) {
+            return false;
+        }
+
+        $this->position = $this->setCharAt($this->position, $this->convertNumber($square, 'internal'), $piece);
+        $this->updateSetup($this->generateFen());
+        return true;
     }
 
     public function get($square)
@@ -521,7 +647,7 @@ class Draughts
         // @todo
     }
 
-    public function convertMoves()
+    public function convertMoves(): array
     {
         // @todo
     }
@@ -539,7 +665,7 @@ class Draughts
         }
 
         if ($notation === 'external') {
-            return $number - floor(($number - 1)/ 11);
+            return $number - floor(($number - 1) / 11);
         }
 
         return $number;
@@ -575,24 +701,97 @@ class Draughts
         return $newPosition;
     }
 
-    public function outsideBoard()
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L996
+     * @param int $square
+     * @return bool
+     */
+    private function outsideBoard(int $square): bool
     {
-        // @todo
+        if ($square >= 0 && $square <= 55 && ($square % 11) !== 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
-    public function directionStrings()
+    /**
+     * Create direction strings for square at position (internal representation)
+     * Output object with four directions as properties (four rhumbs).
+     * Each property has a string as value representing the pieces in that direction.
+     * Piece of the given square is part of each string.
+     * Example of output: {NE: 'b0', SE: 'b00wb00', SW: 'bbb00', NW: 'bb'}
+     * Strings have maximum length of given maxLength.
+     *
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1006
+     * @param string $tempPosition
+     * @param int $square
+     * @param int $maxLength
+     * @return array
+     */
+    public function directionStrings(string $tempPosition, int $square, int $maxLength = 100): array
     {
-        // @todo
+        if ($this->outsideBoard($square) === true) {
+            return []; //return 334;
+        }
+
+        $dirStrings = [];
+
+        foreach ($this->steps as $dir) {
+            $dirArray = [];
+            $i = 0;
+            $index = $square;
+            do {
+                $dirArray[$i] = substr($tempPosition, $index, 1);
+                $i++;
+                $index = $square + $i * $dir;
+                $outside = $this->outsideBoard($index);
+            } while ($outside === false && $i < $maxLength);
+
+            $dirStrings[$dir] = implode('', $dirArray);
+        }
+
+        return $dirStrings;
     }
 
-    public function oppositeDir()
+    /**
+     * @see @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1038
+     * @param string $direction
+     * @return string
+     * @throws \Exception
+     */
+    private function oppositeDir(string $direction): string
     {
-        // @todo
+        $opposite = ['NE' => 'SW', 'SE' => 'NW', 'SW' => 'NE', 'NW' => 'SE'];
+        if (!isset($opposite[$direction])) {
+            throw new \Exception(sprintf('The direction [%s] is not valid.', $direction));
+        }
+
+        return $opposite[$direction];
     }
 
-    public function validDir()
+    /**
+     * @see @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1043
+     * @param string $piece
+     * @param string $dir
+     * @return bool
+     * @throws \Exception
+     */
+    private function validDir(string $piece, string $dir): bool
     {
-        // @todo
+        $valid = [
+            'w' => ['NE' => true, 'SE' => false, 'SW' => false, 'NW' => true],
+            'b' => ['NE' => false, 'SE' => true, 'SW' => true, 'NW' => false],
+        ];
+
+        if (!isset($valid[$piece])) {
+            throw new \Exception(sprintf('The piece [%s] is not valid.', $piece));
+        }
+        if (!isset($valid[$piece][$dir])) {
+            throw new \Exception(sprintf('The direction [%s] is not valid.', $dir));
+        }
+
+        return $valid[$piece][$dir];
     }
 
     public function position()
