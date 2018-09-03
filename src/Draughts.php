@@ -90,9 +90,9 @@ class Draughts
      * @return bool
      * @throws \Exception
      */
-    public function load($fen = null)
+    public function load($fen = null): bool
     {
-        if (is_null($fen) || $fen === $this->defaultFEN){
+        if (is_null($fen) || $fen === $this->defaultFEN) {
             $this->position = $this->defaultPositionInternal;
             // @todo update_setup(generate_fen(position))
             return true;
@@ -107,11 +107,101 @@ class Draughts
 
         $this->clear();
 
-        // @todo
+        // The validator has already removed spaces and suffixes.
+        // So no need to repeat that here.
+        $fen = $checkedFen->fen;
+
+        $tokens = explode(':', $fen);
+
+        // Which side to move
+        $this->turn = substr($tokens[0], 0, 1);
+
+        // Positions
+        $externalPosition = $this->defaultPositionExternal;
+
+        for ($i = 1; $i <= strlen($externalPosition); $i++) {
+            $externalPosition = $this->setCharAr($externalPosition, 1, 0);
+        }
+
+        $externalPosition = $this->setCharAr($externalPosition, 0, $this->turn);
+
+        // @todo refactor
+        for ($k = 1; $k <= 2; $k++) {
+            // @todo called twice
+            $colour = substr($tokens[$k], 0, 1);
+            $sideString = substr($tokens[$k], 1);
+            if (strlen($sideString) === 0) {
+                continue;
+            }
+            $numbers = explode(',', $sideString);
+            for ($i = 0; $i < count($numbers); $i++) {
+                $numSquare = $numbers[$i];
+                $isKing = substr($numSquare, 0, 1) === 'K';
+                $numSquare = ($isKing === true ? substr($numSquare, 1) : $numSquare); // Strips K
+                $range = explode('-', $numSquare);
+                if (count($range) === 2) {
+                    $from = (int)$range[0];
+                    $to = (int)$range[1];
+                    for ($j = $from; $j <= $to; $j++) {
+                        $externalPosition = $this->setCharAr($externalPosition, $j, ($isKing === true ? strtoupper($colour) : strtolower($colour)));
+                    }
+                } else {
+                    $numSquare = (int)$numSquare;
+                    $externalPosition = $this->setCharAr($externalPosition, $numSquare, ($isKing === true ? strtoupper($colour) : strtolower($colour)));
+                }
+            }
+        }
+
+        $this->position = $this->convertPosition($externalPosition, 'internal');
+        $this->updateSetup($this->generateFen());
+
+        return true;
+    }
+
+    /**
+     * Called when the initial board setup is changed with put() or remove().
+     * modifies the SetUp and FEN properties of the header object.  if the FEN is
+     * equal to the default position, the SetUp and FEN are deleted
+     * the setup is only updated if history.length is zero, ie moves haven't been
+     * made.
+     *
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L419
+     * @param string $fen
+     * @return bool
+     */
+    private function updateSetup(string $fen): bool
+    {
+        if (count($this->history) > 0) {
+            return false;
+        }
+        if ($fen === $this->defaultFEN) {
+            $this->header['SetUp'] = '1';
+            $this->header['FEN'] = $fen;
+        } else {
+            unset($this->header['SetUp']);
+            unset($this->header['FEN']);
+        }
+        return true;
+    }
+
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L699
+     * @param string $position
+     * @param int $idx
+     * @param string $chr
+     * @return string
+     */
+    private function setCharAr(string $position, int $idx, string $chr): string
+    {
+        if ($idx > strlen($position) - 1) {
+            return $position;
+        }
+        return substr($position, 0, $idx) . $chr . substr($position, $idx + 1);
     }
 
     /**
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L122
+     * @throws \Exception
      */
     public function reset()
     {
@@ -142,9 +232,31 @@ class Draughts
         return new FenValidator($fen);
     }
 
-    public function generateFen()
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L306
+     * @return string
+     */
+    public function generateFen(): string
     {
-        // @todo
+        $black = [];
+        $white = [];
+        $externalPosition = $this->convertPosition($this->position, 'external');
+        for ($i = 0; $i < strlen($externalPosition); $i++) {
+            if ($externalPosition[$i] === 'w') {
+                $white[] = $i;
+            }
+            if ($externalPosition[$i] === 'W') {
+                $white[] = 'K' . $i;
+            }
+            if ($externalPosition[$i] === 'b') {
+                $black[] = $i;
+            }
+            if ($externalPosition[$i] === 'B') {
+                $black[] = 'K' . $i;
+            }
+        }
+
+        return strtoupper($this->turn) . ':W' . implode(',', $white) . ':B' . implode(',', $black);
     }
 
     public function generatePDN()
@@ -232,9 +344,34 @@ class Draughts
         // @todo
     }
 
-    public function convertPosition()
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L971
+     * @param string $position
+     * @param string $notation
+     * @return string
+     */
+    public function convertPosition(string $position, string $notation): string
     {
-        // @todo
+        $newPosition = $position;
+
+        if ($notation === 'internal') {
+            $sub1 = substr($position, 1, 10);
+            $sub2 = substr($position, 11, 10);
+            $sub3 = substr($position, 21, 10);
+            $sub4 = substr($position, 31, 10);
+            $sub5 = substr($position, 41, 10);
+            $newPosition = sprintf('-%s-%s-%s-%s-%s-', $sub1, $sub2, $sub3, $sub4, $sub5);
+        }
+
+        if ($notation === 'external') {
+            $sub1 = substr($position, 1, 10);
+            $sub2 = substr($position, 12, 10);
+            $sub3 = substr($position, 23, 10);
+            $sub4 = substr($position, 34, 10);
+            $sub5 = substr($position, 45, 10);
+            $newPosition = sprintf('?%s%s%s%s%s', $sub1, $sub2, $sub3, $sub4, $sub5);
+        }
+        return $newPosition;
     }
 
     public function outsideBoard()
