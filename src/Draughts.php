@@ -98,11 +98,11 @@ class Draughts
     private $possibleResults = ['2-0', '0-2', '1-1', '0-0', '*', '1-0', '0-1'];
 
     private $unicodes = [
-        'w' => '\u26C0',
-        'b' => '\u26C2',
-        'B' => '\u26C3',
-        'W' => '\u26C1',
-        '0' => '\u0020\u0020'
+        'w' => "\u{26C0}",
+        'b' => "\u{26C2}",
+        'B' => "\u{26C3}",
+        'W' => "\u{26C1}",
+        '0' => "\u{0020}\u{0020}"
     ];
 
     private $bits = [
@@ -491,10 +491,10 @@ class Draughts
     public function move(Move $move): ?Move
     {
         $moves = $this->generateMoves();
-        for ($i = 0; $i < count($moves); $i++) {
-            if (($move->to === $moves[$i]->to) && ($move->from === $moves[$i]->from)) {
-                $this->makeMove($moves[$i]);
-                return $moves[$i];
+        foreach ($moves as $gMove){
+            if (($move->to === $gMove->to) && ($move->from === $gMove->from)) {
+                $this->makeMove($gMove);
+                return $gMove;
             }
         }
         return null;
@@ -730,7 +730,7 @@ class Draughts
      */
     private function makeMove(Move $move)
     {
-        $move->piece = substr($this->position, $this->convertNumber($move->from, 'internal'));
+        $move->piece = substr($this->position, $this->convertNumber($move->from, 'internal'), 1);
         $this->position = $this->setCharAt($this->position, $this->convertNumber($move->to, 'internal'), $move->piece);
         $this->position = $this->setCharAt($this->position, $this->convertNumber($move->from, 'internal'), 0);
         $move->flags = self::FLAG_NORMAL;
@@ -1092,14 +1092,14 @@ class Draughts
 
         $dirStrings = [];
 
-        foreach ($this->steps as $dir) {
+        foreach ($this->steps as $dir => $value) {
             $dirArray = [];
             $i = 0;
             $index = $square;
             do {
                 $dirArray[$i] = substr($tempPosition, $index, 1);
                 $i++;
-                $index = $square + $i * $dir;
+                $index = $square + $i * $value;
                 $outside = $this->outsideBoard($index);
             } while ($outside === false && $i < $maxLength);
 
