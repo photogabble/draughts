@@ -23,6 +23,11 @@ class History
      */
     public $moveNumber;
 
+    private $signs = [
+        'n' => '-',
+        'c' => 'x'
+    ];
+
     /**
      * History constructor.
      * @param Move $move
@@ -34,5 +39,27 @@ class History
         $this->move = $move;
         $this->turn = $turn;
         $this->moveNumber = $moveNumber;
+    }
+
+    /**
+     * This originates from the getHistory method on the original source
+     * as a way of returning an array containing string
+     * representations of the move.
+     *
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1111
+     * @param bool $pretty
+     * @return string
+     */
+    public function history(bool $pretty = false): string
+    {
+        if ($pretty === true) {
+            $arr = $this->move->toArray();
+            if ($this->move->flags === 'c') {
+                $arr['captures'] = implode(',', $this->move->captures);
+            }
+            return json_encode($arr);
+        }
+
+        return json_encode($this->move->from . $this->signs[$this->move->flags] . $this->move->to);
     }
 }

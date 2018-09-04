@@ -40,11 +40,6 @@ class Draughts
         '0' => '\u0020\u0020'
     ];
 
-    private $signs = [
-        'n' => '-',
-        'c' => 'x'
-    ];
-
     private $bits = [
         'NORMAL' => 1,
         'CAPTURE' => 2,
@@ -75,25 +70,12 @@ class Draughts
     }
 
     /**
-     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L113
-     */
-    public function clear()
-    {
-        $this->position = $this->defaultPositionInternal;
-        $this->turn = self::WHITE;
-        $this->moveNumber = 1;
-        $this->history = [];
-        $this->header = [];
-        // @todo update_setup(generate_fen())
-    }
-
-    /**
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L126
-     * @param null $fen
+     * @param null|string $fen
      * @return bool
      * @throws \Exception
      */
-    public function load($fen = null): bool
+    public function load(string $fen = null): bool
     {
         if (is_null($fen) || $fen === $this->defaultFEN) {
             $this->position = $this->defaultPositionInternal;
@@ -162,47 +144,6 @@ class Draughts
     }
 
     /**
-     * Called when the initial board setup is changed with put() or remove().
-     * modifies the SetUp and FEN properties of the header object.  if the FEN is
-     * equal to the default position, the SetUp and FEN are deleted
-     * the setup is only updated if history.length is zero, ie moves haven't been
-     * made.
-     *
-     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L419
-     * @param string $fen
-     * @return bool
-     */
-    private function updateSetup(string $fen): bool
-    {
-        if (count($this->history) > 0) {
-            return false;
-        }
-        if ($fen === $this->defaultFEN) {
-            $this->header['SetUp'] = '1';
-            $this->header['FEN'] = $fen;
-        } else {
-            unset($this->header['SetUp']);
-            unset($this->header['FEN']);
-        }
-        return true;
-    }
-
-    /**
-     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L699
-     * @param string $position
-     * @param int $idx
-     * @param string $chr
-     * @return string
-     */
-    private function setCharAt(string $position, int $idx, string $chr): string
-    {
-        if ($idx > strlen($position) - 1) {
-            return $position;
-        }
-        return substr($position, 0, $idx) . $chr . substr($position, $idx + 1);
-    }
-
-    /**
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L122
      * @throws \Exception
      */
@@ -212,25 +153,16 @@ class Draughts
     }
 
     /**
-     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L860
-     * @param Move $move
-     */
-    public function push(Move $move)
-    {
-        array_push($this->history, new History($move, $this->turn, $this->moveNumber));
-    }
-
-    /**
+     * Original source has this proxied as moves publicly.
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L643
-     * @param null $square
+     * @param null|int $square
      * @return Move[]
+     * @throws \Exception
      */
-    public function moves($square = null)
+    public function generateMoves(int $square = null)
     {
-        $moves = [];
-
         if (!is_null($square)) {
-            $moves = $this->getLegalMoves($square->square);
+            $moves = $this->getLegalMoves($square);
         } else {
             /** @var Move[] $tmpCaptures */
             $tmpCaptures = $this->getCaptures(); // @todo make sure these are cloned objects....
@@ -255,6 +187,7 @@ class Draughts
     /**
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1080
      * @return bool
+     * @throws \Exception
      */
     public function gameOver(): bool
     {
@@ -268,11 +201,10 @@ class Draughts
         return true;
     }
 
-
     /**
      * Returns true or false if the game is drawn (50-move rule or insufficient material).
-     *
      * Looks like the source library hard coded this.
+     *
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1172
      * @todo finish this?
      * @return bool
@@ -283,6 +215,8 @@ class Draughts
     }
 
     /**
+     * Original source has this proxied as a public method validate_fen.
+     *
      * @param string $fen
      * @return FenValidator
      */
@@ -292,6 +226,8 @@ class Draughts
     }
 
     /**
+     * Original source has this proxied as a public method fen.
+     *
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L306
      * @return string
      */
@@ -319,6 +255,8 @@ class Draughts
     }
 
     /**
+     * Original source has this proxied as a public method pdn.
+     *
      * @todo replace $options with two arguments
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L331
      * @param array|null $options
@@ -398,51 +336,6 @@ class Draughts
     }
 
     /**
-     * @param null $square
-     * @return array|Move[]
-     */
-    private function generateMoves($square = null): array
-    {
-        if (!is_null($square)) {
-            $moves = $this->getLegalMoves($square->square);
-        } else {
-            $tempCaptures = $this->getCaptures();
-            // TODO change to be applicable to array
-            if (count($tempCaptures) > 0) {
-                foreach ($tempCaptures as &$capture) {
-                    $capture->flags = self::FLAG_CAPTURE;
-                    $capture->captures = $capture->jumps;
-                    $capture->piecesCaptures = $capture->piecesTaken;
-                }
-                unset ($capture);
-
-                return $tempCaptures;
-            }
-            $moves = $this->getMoves();
-        }
-
-        // TODO returns [] for on hovering for square no
-        // moves = [].concat.apply([], moves)
-        // @todo port the above line that flattens an array
-
-        return $moves;
-    }
-
-    /**
-     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L404
-     * @param array $values
-     * @return array
-     */
-    private function setHeader(array $values = []): array
-    {
-        foreach ($values as $key => $value) {
-            $this->header[$key] = $value;
-        }
-
-        return $this->header;
-    }
-
-    /**
      * This looks not to be implemented in the js source.
      *
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1182
@@ -456,12 +349,27 @@ class Draughts
 
     public function parsePDN()
     {
-        // @todo
+        // @todo port
     }
 
-    public function header($args)
+    /**
+     * Set the header properties from an array of $values.
+     *
+     * Originates from the private method `set_header`
+     * mapped to public `header` method on
+     * the JavaScript source.
+     *
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L404
+     * @param array $values
+     * @return array
+     */
+    public function setHeader(array $values = []): array
     {
-        // @todo
+        foreach ($values as $key => $value) {
+            $this->header[$key] = $value;
+        }
+
+        return $this->header;
     }
 
     /**
@@ -513,8 +421,9 @@ class Draughts
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1196
      * @param Move $move
      * @return Move
+     * @throws \Exception
      */
-    public function move(Move $move): Move
+    public function move(Move $move): ?Move
     {
         $moves = $this->generateMoves();
         for ($i = 0; $i < count($moves); $i++) {
@@ -523,9 +432,15 @@ class Draughts
                 return $moves[$i];
             }
         }
+        return null;
     }
 
-    public function getMoves($index)
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L684
+     * @return array
+     * @throws \Exception
+     */
+    public function getMoves()
     {
         $moves = [];
         $us = $this->turn;
@@ -545,11 +460,12 @@ class Draughts
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L666
      * @param int $index
      * @return array
+     * @throws \Exception
      */
-    public function getLegalMoves(int $index)
+    public function getLegalMoves(int $index): array
     {
         $index = $this->convertNumber($index, 'internal');
-        $captures = $this->capturesAtSquare($index, ['position' => $this->position, 'dirFrom' => ''], ['jumps' => [$index], 'takes' => [], 'piecesTaken' => []]);
+        $captures = $this->capturesAtSquare($index, new CaptureState($this->position), new Move(['jumps' => [$index], 'takes' => [], 'piecesTaken' => []]));
         $captures = $this->longestCapture($captures);
         $legalMoves = $captures;
         if (count($legalMoves) === 0) {
@@ -557,17 +473,6 @@ class Draughts
         }
 
         return $this->convertMoves($legalMoves, 'external');
-    }
-
-    /**
-     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L769
-     * @param $posFrom
-     * @param $state
-     * @param $capture
-     */
-    private function capturesAtSquare($posFrom, $state, $capture)
-    {
-        // @todo
     }
 
     /**
@@ -605,6 +510,19 @@ class Draughts
     }
 
     /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L113
+     */
+    public function clear()
+    {
+        $this->position = $this->defaultPositionInternal;
+        $this->turn = self::WHITE;
+        $this->moveNumber = 1;
+        $this->history = [];
+        $this->header = [];
+        $this->updateSetup($this->generateFen());
+    }
+
+    /**
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L598
      * @param string $piece
      * @param int $square
@@ -627,29 +545,401 @@ class Draughts
         return true;
     }
 
-    public function get($square)
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L593
+     * @param $square
+     * @return string
+     */
+    public function get($square): string
     {
-        // @todo
+        return substr($this->position, $this->convertNumber($square, 'internal'), 1);
     }
 
-    public function remove($square)
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L614
+     * @param int $square
+     * @return string
+     */
+    public function remove(int $square):string
     {
-        // @todo
+        $piece = $this->get($square);
+        $this->position = $this->setCharAt($this->position, $this->convertNumber($square, 'internal'), 0);
+        $this->updateSetup($this->generateFen());
+        return $piece;
     }
 
+    /**
+     * Looks like this was a work in progress on the original js source...
+     * @todo finish if possible?
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1134
+     * @param $depth
+     */
     public function perft($depth)
     {
-        // @todo
+        // ...
     }
 
-    public function history()
+    /**
+     * This is proxied as a public method named history in the js source.
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1091
+     * @param bool $verbose
+     * @return array
+     */
+    public function getHistory(bool $verbose = false): array
     {
-        // @todo
+        $moveHistory = [];
+        foreach ($this->history as $item) {
+            $moveHistory = $item->history($verbose);
+        }
+        return $moveHistory;
     }
 
-    public function convertMoves(): array
+    /**
+     * This was proxies by position on the js version.
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1107
+     * @return string
+     */
+    public function getPosition(): string
     {
-        // @todo
+        return $this->convertPosition($this->position, 'external');
+    }
+
+    //
+    // PRIVATE BELOW
+    //
+
+    /**
+     * Called when the initial board setup is changed with put() or remove().
+     * modifies the SetUp and FEN properties of the header object.  if the FEN is
+     * equal to the default position, the SetUp and FEN are deleted
+     * the setup is only updated if history.length is zero, ie moves haven't been
+     * made.
+     *
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L419
+     * @param string $fen
+     * @return bool
+     */
+    private function updateSetup(string $fen): bool
+    {
+        if (count($this->history) > 0) {
+            return false;
+        }
+        if ($fen === $this->defaultFEN) {
+            $this->header['SetUp'] = '1';
+            $this->header['FEN'] = $fen;
+        } else {
+            unset($this->header['SetUp']);
+            unset($this->header['FEN']);
+        }
+        return true;
+    }
+
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L699
+     * @param string $position
+     * @param int $idx
+     * @param string $chr
+     * @return string
+     */
+    private function setCharAt(string $position, int $idx, string $chr): string
+    {
+        if ($idx > strlen($position) - 1) {
+            return $position;
+        }
+        return substr($position, 0, $idx) . $chr . substr($position, $idx + 1);
+    }
+
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L860
+     * @param Move $move
+     */
+    private function push(Move $move)
+    {
+        array_push($this->history, new History($move, $this->turn, $this->moveNumber));
+    }
+
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L565
+     * @param Move $move
+     * @return void
+     */
+    private function makeMove(Move $move)
+    {
+        $move->piece = substr($this->position, $this->convertNumber($move->from, 'internal'));
+        $this->position = $this->setCharAt($this->position, $this->convertNumber($move->to, 'internal'), $move->piece);
+        $this->position = $this->setCharAt($this->position, $this->convertNumber($move->from, 'internal'), 0);
+        $move->flags = self::FLAG_NORMAL;
+
+        // TODO refactor to either takes or capture
+
+        if (count($move->takes) > 0) {
+            $move->flags = self::FLAG_CAPTURE;
+            $move->captures = $move->takes;
+            $move->piecesCaptured = $move->piecesTaken;
+            for ($i = 0; $i < count($move->takes); $i++) {
+                $this->position = $this->setCharAt($this->position, $this->convertNumber($move->takes[$i], 'internal'), 0);
+            }
+        }
+        // Promoting piece here
+        if ($move->to <= 5 && $move->piece === 'w') {
+            $move->flags = self::FLAG_PROMOTION;
+            $this->position = $this->setCharAt($this->position, $this->convertNumber($move->to, 'internal'), strtoupper($move->piece));
+        } else if ($move->to >= 46 && $move->piece === 'b') {
+            $this->position = $this->setCharAt($this->position, $this->convertNumber($move->to, 'internal'), strtoupper($move->piece));
+        }
+
+        $this->push($move);
+
+        if ($this->turn === self::BLACK) {
+            $this->moveNumber += 1;
+        }
+        $this->turn = $this->swapColour($this->turn);
+    }
+
+    /**
+     * @todo refactor so its void?
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L899
+     * @param string $colour
+     * @return string
+     */
+    private function swapColour(string $colour)
+    {
+        return $colour === self::WHITE ? self::BLACK : self::WHITE;
+    }
+
+    /**
+     * This was also proxied by a public captures method on the original js source.
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L750
+     * @return array
+     * @throws \Exception
+     */
+    private function getCaptures()
+    {
+        $us = $this->turn;
+        $captures = [];
+        for ($i = 0; $i < strlen($this->position); $i++) {
+            if ($this->position[$i] === $us || $this->position[$i] === strtolower($us)) {
+                $posFrom = $i;
+                $state = new CaptureState($this->position, '');
+                $capture = new Move(['jumps' => [], 'takes' => [], 'from' => $posFrom, 'to' => '', 'piecesTaken' => []]);
+                $capture->jumps[0] = $posFrom;
+                $tempCaptures = $this->capturesAtSquare($posFrom, $state, $capture);
+                if (count($tempCaptures) > 0) {
+                    $captures = array_merge($captures, $this->convertMoves($tempCaptures, 'external'));
+                }
+            }
+        }
+        $captures = $this->longestCapture($captures);
+        return $captures;
+    }
+
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L769
+     * @param int $posFrom
+     * @param CaptureState $state
+     * @param Move $capture
+     * @return array
+     * @throws \Exception
+     */
+    private function capturesAtSquare(int $posFrom, CaptureState $state, Move $capture): array
+    {
+        $piece = substr($state->position, $posFrom, 1);
+        if (!in_array($piece, ['b', 'w', 'B', 'W'])) {
+            return [$capture];
+        }
+
+        if ($piece === 'b' || $piece === 'w') {
+            $dirString = $this->directionStrings($state->position, $posFrom, 3);
+        } else {
+            $dirString = $this->directionStrings($state->position, $posFrom);
+        }
+
+        $finished = true;
+        $captureArrayForDir = [];
+
+        foreach ($dirString as $dir => $str) {
+            if ($dir === $state->dirFrom) {
+                continue;
+            }
+            if (in_array($piece, ['b', 'w'])) {
+                // matches: bw0, bW0, wB0, wb0
+                if (preg_match('/^b[wW]0|^w[bB]0/', $str, $matchArray) > 0) {
+                    $posTo = $posFrom + (2 * $this->steps[$dir]); // @todo should $posTo & $posTake be rounded?
+                    $posTake = $posFrom + (1 * $this->steps[$dir]);
+
+                    if (in_array($posTake, $capture->takes)) {
+                        continue; // capturing twice forbidden
+                    }
+
+                    $updateCapture = clone($capture);
+                    $updateCapture->to = $posTo;
+                    $updateCapture->jumps[] = $posTo;
+                    $updateCapture->takes[] = $posTake;
+                    $updateCapture->piecesTaken[] = substr($this->position, $posTake, 1);
+                    $updateCapture->from = $posFrom;
+
+                    $updateState = clone($state);
+                    $updateState->dirFrom = $this->oppositeDir($dir);
+                    $pieceCode = substr($updateState->position, $posFrom, 1);
+                    $updateState->position = $this->setCharAt($updateState->position, $posFrom, 0);
+                    $updateState->position = $this->setCharAt($updateState->position, $posTo, $pieceCode);
+
+                    $finished = false;
+                    $captureArrayForDir[$dir] = $this->capturesAtSquare($posTo, $updateState, $updateCapture);
+                }
+            }
+            if (in_array($piece, ['B', 'W'])) {
+                // matches: B00w000, WB00
+                if (preg_match('/^B0*[wW]0+|^W0*[bB]0+/', $str, $matchArray) > 0) {
+                    $matchStr = $matchArray[0];
+
+                    // // matches: w000, B00
+                    preg_match('/[wW]0+$|[bB]0+$/', $matchStr, $matchArraySubstr);
+
+                    $matchSubstr = $matchArraySubstr[0];
+                    $takeIndex = strlen($matchStr) - strlen($matchSubstr);
+                    $posTake = $posFrom + ($takeIndex * $this->steps[$dir]);
+
+                    if (in_array($posTake, $capture->takes)) {
+                        continue; // capturing twice forbidden
+                    }
+
+                    for ($i = 1; $i < strlen($matchSubstr); $i++) {
+                        $posTo = $posFrom + (($takeIndex + $i) * $this->steps[$dir]);
+
+                        $updateCapture = clone($capture);
+                        $updateCapture->jumps[] = $posTo;
+                        $updateCapture->to = $posTo;
+                        $updateCapture->takes[] = $posTake;
+                        $updateCapture->piecesTaken[] = substr($this->position, $posTake, 1);
+                        $updateCapture->from = $posFrom;
+
+                        $updateState = clone($state);
+                        $updateState->dirFrom = $this->oppositeDir($dir);
+                        $pieceCode = substr($updateState->position, $posFrom, 1);
+                        $updateState->position = $this->setCharAt($updateState->position, $posFrom, 0);
+                        $updateState->position = $this->setCharAt($updateState->position, $posTo, $pieceCode);
+
+                        $finished = false;
+                        $dirIndex = $dir . (string)$i;
+                        $captureArrayForDir[$dirIndex] = $this->capturesAtSquare($posTo, $updateState, $updateCapture);
+                    }
+                }
+            }
+        }
+
+
+        $captureArray = [];
+        if ($finished === true && count($capture->takes) > 0) {
+            // fix for mutiple capture
+            $capture->from = $capture->jumps[0];
+            $captureArray[0] = $capture;
+        } else {
+            foreach ($captureArrayForDir as $dir) {
+                $captureArray = array_merge($captureArray, $dir);
+            }
+        }
+        return $captureArray;
+    }
+
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L912
+     * @param array|Move[] $captures
+     * @return array
+     */
+    private function longestCapture(array $captures): array
+    {
+        $maxJumpCount = 0;
+        for ($i = 0; $i < count($captures); $i++) {
+            $jumpCount = count($captures[$i]->jumps);
+            if ($jumpCount > $maxJumpCount) {
+                $maxJumpCount = $jumpCount;
+            }
+        }
+
+        $selectedCaptures = [];
+        if ($maxJumpCount < 2) {
+            return $selectedCaptures;
+        }
+
+        for ($i = 0; $i < count($captures); $i++) {
+            if (count($captures[$i]->jumps) === $maxJumpCount) {
+                $selectedCaptures[] = $captures[$i];
+            }
+        }
+        return $selectedCaptures;
+    }
+
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L708
+     * @param int $square
+     * @return array
+     * @throws \Exception
+     */
+    private function movesAtSquare(int $square)
+    {
+        $moves = [];
+        $posFrom = $square;
+        $piece = substr($this->position, $square, 1);
+
+        if (in_array($piece, ['b', 'w'])) {
+            $dirStrings = $this->directionStrings($this->position, $posFrom, 2);
+            foreach ($dirStrings as $dir => $str) {
+                // // e.g. b0 w0
+                if (preg_match('/^[bw]0/', $str, $matchArray)) {
+                    if ($this->validDir($piece, $dir) === true) { // validDir maybe shouldn't throw an exception?
+                        $posTo = $posFrom + $this->steps[$dir];
+                        $moveObject = new Move(['from' => $posFrom, 'to' => $posTo, 'takes' => [], 'jumps' => []]);
+                        $moves[] = $moveObject;
+                    }
+                }
+            }
+        }
+
+        if (in_array($piece, ['B', 'W'])) {
+            $dirStrings = $this->directionStrings($this->position, $posFrom, 2);
+            foreach ($dirStrings as $dir => $str) {
+                // e.g. B000, W0
+                if (preg_match('/^[BW]0+/', $str, $matchArray)) {
+                    for ($i = 1; $i < count($matchArray[0]); $i++) {
+                        $posTo = $posFrom + ($i * $this->steps[$dir]);
+                        $moveObject = new Move(['from' => $posFrom, 'to' => $posTo, 'takes' => [], 'jumps' => []]);
+                        $moves[] = $moveObject;
+                    }
+                }
+            }
+        }
+
+        return $moves;
+    }
+
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L934
+     * @param array|Move[] $moves
+     * @param string $type
+     * @return array
+     */
+    private function convertMoves(array $moves, string $type): array
+    {
+        $tempMoves = [];
+        if (!in_array($type, ['internal', 'external']) || count($moves) === 0) {
+            return $tempMoves;
+        }
+
+        for ($i = 0; $i < count($moves); $i++) {
+            $moveObject = new Move(['jumps' => [], 'takes' => []]);
+            $moveObject->from = $this->convertNumber($moves[$i]->from, $type);
+            for ($j = 0; $j < count($moves[$i]->jumps); $j++) {
+                $moveObject->jumps[$j] = $this->convertNumber($moves[$i]->jumps[$j], $type);
+            }
+            for ($j = 0; $j < count($moves[$i]->takes); $j++) {
+                $moveObject->takes[$j] = $this->convertNumber($moves[$i]->takes[$j], $type);
+            }
+            $moveObject->to = $this->convertNumber($moves[$i]->to, $type);
+            $moveObject->piecesTaken = $moves[$i]->piecesTaken;
+            $tempMoves[] = $moveObject;
+        }
+        return $tempMoves;
     }
 
     /**
@@ -658,7 +948,7 @@ class Draughts
      * @param string $notation
      * @return int
      */
-    public function convertNumber(int $number, string $notation): int
+    private function convertNumber(int $number, string $notation): int
     {
         if ($notation === 'internal') {
             return $number + floor(($number - 1) / 10);
@@ -677,7 +967,7 @@ class Draughts
      * @param string $notation
      * @return string
      */
-    public function convertPosition(string $position, string $notation): string
+    private function convertPosition(string $position, string $notation): string
     {
         $newPosition = $position;
 
@@ -729,7 +1019,7 @@ class Draughts
      * @param int $maxLength
      * @return array
      */
-    public function directionStrings(string $tempPosition, int $square, int $maxLength = 100): array
+    private function directionStrings(string $tempPosition, int $square, int $maxLength = 100): array
     {
         if ($this->outsideBoard($square) === true) {
             return []; //return 334;
@@ -771,7 +1061,7 @@ class Draughts
     }
 
     /**
-     * @see @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1043
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L1043
      * @param string $piece
      * @param string $dir
      * @return bool
@@ -792,20 +1082,5 @@ class Draughts
         }
 
         return $valid[$piece][$dir];
-    }
-
-    public function position()
-    {
-        // @todo
-    }
-
-    public function makePretty()
-    {
-        // @todo
-    }
-
-    public function captures()
-    {
-        // @todo
     }
 }
