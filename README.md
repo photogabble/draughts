@@ -6,15 +6,19 @@
 </p>
 
 ## About this package
-A PHP checkers library for move generation/validation, piece placement/movement and draw detection. Useful for writing the server side implementation of a multi-player checkers game.
+A PHP checkers library for move generation/validation, piece placement/movement and draw detection. Useful for writing the server side implementation of a multi-player checkers game. It has been ported from a JavaScript implementation by [@shubhendusaurabh](https://github.com/shubhendusaurabh).
 
 ## Install
 
-`@todo`
+Install using composer: `compoer require photogabble/draughts`
 
 ## Usage
 
-`@todo`
+The code below will play a complete game of draughts with each move being picked randomly:
+
+```php
+
+```
 
 ## Not invented here
 
