@@ -17,7 +17,15 @@ Install using composer: `compoer require photogabble/draughts`
 The code below will play a complete game of draughts with each move being picked randomly:
 
 ```php
-
+$draughts = new Draughts();
+echo $draughts->ascii();
+while (!$draughts->gameOver())
+{
+    $moves = $draughts->getMoves();
+    $move = $moves[array_rand($moves, 1)];
+    $draughts->move($move);
+    echo $draughts->ascii();
+}
 ```
 
 ## Not invented here
