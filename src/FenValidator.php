@@ -29,15 +29,16 @@ class FenValidator
     {
         $this->fen = trim(str_replace(' ', '', $fen));
 
-        if ($fen === 'B::' || $fen === 'W::' || $fen === '?::') {
-            $this->fen .= ':B:W'; // exception allowed i.e. empty fen
-            return;
-        }
-
+        // Remove tailing dots
         $this->fen = preg_replace('/\..*$/', '', $this->fen);
 
         if ($this->fen === '') {
             $this->error = $this->errors[7];
+            return;
+        }
+
+        if ($fen === 'B::' || $fen === 'W::' || $fen === '?::') {
+            $this->fen .= ':B:W'; // exception allowed i.e. empty fen
             return;
         }
 
