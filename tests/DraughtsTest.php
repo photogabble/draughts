@@ -3,6 +3,7 @@
 namespace Photogabble\Draughts\Tests;
 
 use Photogabble\Draughts\Draughts;
+use Photogabble\Draughts\Move;
 use PHPUnit\Framework\TestCase;
 
 class DraughtsTest extends TestCase
@@ -24,7 +25,31 @@ class DraughtsTest extends TestCase
                     "+------------------------------+\n";
         $draughts = new Draughts();
         $this->assertEquals($expected, $draughts->ascii());
-        $n =1;
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testMove()
+    {
+        $expected = "\n+------------------------------+\n".
+                    "|\t   b   b   b   b   b  \t|\n".
+                    "|\t b   b   b   b   b    \t|\n".
+                    "|\t   b   b   b   b   b  \t|\n".
+                    "|\t 0   b   b   b   b    \t|\n".
+                    "|\t   0   0   0   0   0  \t|\n".
+                    "|\t w   0   0   0   0    \t|\n".
+                    "|\t   0   b   w   w   w  \t|\n".
+                    "|\t w   w   w   w   w    \t|\n".
+                    "|\t   w   w   w   w   w  \t|\n".
+                    "|\t w   w   w   w   w    \t|\n".
+                    "+------------------------------+\n";
+        $draughts = new Draughts();
+        $this->assertFalse(is_null($draughts->move( new Move(['from' => 31, 'to' => 26])))); // W
+        $this->assertFalse(is_null($draughts->move( new Move(['from' => 16, 'to' => 21])))); // B
+        $this->assertFalse(is_null($draughts->move( new Move(['from' => 32, 'to' => 27])))); // W
+        $this->assertFalse(is_null($draughts->move( new Move(['from' => 21, 'to' => 32])))); // B
+        $this->assertEquals($expected, $draughts->ascii());
     }
 
     public function testPerft()
