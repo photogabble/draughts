@@ -19,7 +19,8 @@ class PlayThroughTest extends TestCase
         {
             $moves = $draughts->getMoves();
             $move = $moves[array_rand($moves, 1)];
-            $this->assertNotNull($draughts->move($move));
+            $r = $draughts->move($move);
+            $this->assertNotNull($r);
             echo $draughts->ascii(true);
         }
     }
