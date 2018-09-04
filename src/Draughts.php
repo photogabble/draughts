@@ -2,6 +2,71 @@
 
 namespace Photogabble\Draughts;
 
+/**
+ * Class Draughts
+ *
+ * This class and its companions are part of a port to PHP from the JavaScript
+ * project: https://github.com/shubhendusaurabh/draughts.js
+ *
+ * ==================================================================================
+ * DESCRIPTION OF IMPLEMENTATION PRINCIPLES
+ * A. Position for rules (internal representation): string with length 56.
+ *    Special numbering for easy applying rules.
+ *    Valid characters: b B w W 0 -
+ *       b (black) B (black king) w (white) W (white king) 0 (empty) (- unused)
+ *    Examples:
+ *      '-bbbBBB000w-wwWWWwwwww-bbbbbbbbbb-000wwwwwww-00bbbwwWW0-'
+ *      '-0000000000-0000000000-0000000000-0000000000-0000000000-'  (empty position)
+ *      '-bbbbbbbbbb-bbbbbbbbbb-0000000000-wwwwwwwwww-wwwwwwwwww-'  (start position)
+ * B. Position (external respresentation): string with length 51.
+ *    Square numbers are represented by the position of the characters.
+ *    Position 0 is reserved for the side to move (B or W)
+ *    Valid characters: b B w W 0
+ *       b (black) B (black king) w (white) W (white king) 0 (empty)
+ *    Examples:
+ *       'B00000000000000000000000000000000000000000000000000'  (empty position)
+ *       'Wbbbbbbbbbbbbbbbbbbbb0000000000wwwwwwwwwwwwwwwwwwww'  (start position)
+ *       'WbbbbbbBbbbbb00bbbbb000000w0W00ww00wwwwww0wwwwwwwww'  (random position)
+ *
+ * External numbering      Internal Numbering
+ * --------------------    --------------------
+ *   01  02  03  04  05      01  02  03  04  05
+ * 06  07  08  09  10      06  07  08  09  10
+ *   11  12  13  14  15      12  13  14  15  16
+ * 16  17  18  19  20      17  18  19  20  21
+ *   21  22  23  24  25      23  24  25  26  27
+ * 26  27  28  29  30      28  29  30  31  32
+ *   31  32  33  34  35      34  35  36  37  38
+ * 36  37  38  39  40      39  40  41  42  43
+ *   41  42  43  44  45      45  46  47  48  49
+ * 46  47  48  49  50      50  51  52  53  54
+ * --------------------    --------------------
+ *
+ * Internal numbering has fixed direction increments for easy applying rules:
+ *   NW   NE         -5   -6
+ *     \ /             \ /
+ *     sQr     >>      sQr
+ *     / \             / \
+ *   SW   SE         +5   +6
+ *
+ * DIRECTION-STRINGS
+ * Strings of variable length for each of four directions at one square.
+ * Each string represents the position in that direction.
+ * Directions: NE, SE, SW, NW (wind directions)
+ * Example for square 29 (internal number):
+ *   NE: 29, 24, 19, 14, 09, 04     b00bb0
+ *   SE: 35, 41, 47, 53             bww0
+ *   SW: 34, 39                     b0
+ *   NW: 23, 17                     bw
+ * CONVERSION internal to external representation of numbers.
+ *   N: external number, values 1..50
+ *   M: internal number, values 0..55 (invalid 0,11,22,33,44,55)
+ *   Formulas:
+ *   M = N + floor((N-1)/10)
+ *   N = M - floor((M-1)/11)
+ *
+ *==================================================================================
+ */
 class Draughts
 {
     const BLACK = 'B';
