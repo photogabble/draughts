@@ -329,13 +329,17 @@ class Draughts
      */
     public function generatePDN(array $options = null)
     {
+        $this->setHeader([
+            'FEN' => $this->generateFen()
+        ]);
+
         $newLine = (is_array($options) && isset($options['newline_char'])) ? $options['newline_char'] : "\n";
         $maxWidth = (is_array($options) && isset($options['maxWidth'])) ? $options['maxWidth'] : 0;
         $result = [];
         $headerExists = false;
 
-        foreach ($this->header as $i => $header) {
-            array_push($result, sprintf('[%d "%s"]', $i, $header) . $newLine);
+        foreach ($this->header as $name => $header) {
+            array_push($result, sprintf('[%s "%s"]', $name, $header) . $newLine);
             $headerExists = true;
         }
 
@@ -675,7 +679,7 @@ class Draughts
 
     /**
      * Called when the initial board setup is changed with put() or remove().
-     * modifies the SetUp and FEN properties of the header object.  if the FEN is
+     * modifies the SetUp and FEN properties of the header object. If the FEN is
      * equal to the default position, the SetUp and FEN are deleted
      * the setup is only updated if history.length is zero, ie moves haven't been
      * made.
