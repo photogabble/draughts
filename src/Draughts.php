@@ -991,17 +991,19 @@ class Draughts
             return $tempMoves;
         }
 
-        for ($i = 0; $i < count($moves); $i++) {
+        foreach($moves as $move){
             $moveObject = new Move(['jumps' => [], 'takes' => []]);
-            $moveObject->from = $this->convertNumber($moves[$i]->from, $type);
-            for ($j = 0; $j < count($moves[$i]->jumps); $j++) {
-                $moveObject->jumps[$j] = $this->convertNumber($moves[$i]->jumps[$j], $type);
+            $moveObject->from = $this->convertNumber($move->from, $type);
+            foreach($move->jumps as $j => $jump) {
+                $moveObject->jumps[$j] = $this->convertNumber($jump, $type);
             }
-            for ($j = 0; $j < count($moves[$i]->takes); $j++) {
-                $moveObject->takes[$j] = $this->convertNumber($moves[$i]->takes[$j], $type);
+            foreach ($move->takes as $j => $take)
+            {
+                $moveObject->takes[$j] = $this->convertNumber($take, $type);
             }
-            $moveObject->to = $this->convertNumber($moves[$i]->to, $type);
-            $moveObject->piecesTaken = $moves[$i]->piecesTaken;
+
+            $moveObject->to = $this->convertNumber($move->to, $type);
+            $moveObject->piecesTaken = $move->piecesTaken;
             $tempMoves[] = $moveObject;
         }
         return $tempMoves;
