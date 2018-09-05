@@ -970,7 +970,7 @@ class Draughts
             $dirStrings = $this->directionStrings($this->position, $posFrom, 2);
             foreach ($dirStrings as $dir => $str) {
                 // e.g. B000, W0
-                if (preg_match('/^[BW]0+/', $str, $matchArray)) {
+                if (preg_match_all('/^[BW]0+/', $str, $matchArray)) {
                     for ($i = 1; $i < count($matchArray[0]); $i++) {
                         $posTo = $posFrom + ($i * $this->steps[$dir]);
                         $moves[] = new Move(['from' => $posFrom, 'to' => $posTo, 'takes' => [], 'jumps' => []]);
