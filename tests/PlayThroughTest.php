@@ -22,6 +22,7 @@ class PlayThroughTest extends TestCase
             $move = $moves[array_rand($moves, 1)];
             $r = $draughts->move($move);
             if (is_null($r)){
+                $x = $draughts->generatePDN();
                 $n = 1;
             }
             $this->assertNotNull($r);
@@ -29,6 +30,36 @@ class PlayThroughTest extends TestCase
         }
     }
 
+    /**
+     * This was written for issue #2.
+     * @throws \Exception
+     */
+    public function testGetMoves()
+    {
+        $turns = [
+            new Move(['from' => 32, 'to' => 28]), // W
+            new Move(['from' => 17, 'to' => 21]), // B
+            new Move(['from' => 37, 'to' => 32]), // W
+            new Move(['from' => 20, 'to' => 25]), // B
+            new Move(['from' => 35, 'to' => 30]), // W
+            new Move(['from' => 21, 'to' => 26]), // B
+            new Move(['from' => 28, 'to' => 23]), // W
+        ];
+        $draughts = new Draughts();
+        foreach ($turns as $turn) {
+            $this->assertNotNull($draughts->move($turn));
+        }
+
+        $validTurns = $draughts->getMoves();
+        // only two valid moves 19-28 and 18-29
+        $this->assertCount(2, $validTurns);
+
+        $n = 1;
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function testFixedMatch()
     {
         $turns = [
@@ -36,15 +67,11 @@ class PlayThroughTest extends TestCase
             new Move(['from' => 20, 'to' => 25]), // B
             new Move(['from' => 35, 'to' => 30]), // W
             new Move(['from' => 17, 'to' => 22]), // B
-            new Move(['from' => 30, 'to' => 24]), // W
+            new Move(['from' => 28, 'to' => 17]), // W
         ];
         $draughts = new Draughts();
         foreach ($turns as $turn) {
-            $r = $draughts->move($turn);
-            $fen = $draughts->generatePDN();
-            if (is_null($r)){
-                $n = 1;
-            }
+            $this->assertNotNull($draughts->move($turn));
         }
     }
 
