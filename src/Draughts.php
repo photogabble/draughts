@@ -693,7 +693,7 @@ class Draughts
         if (count($this->history) > 0) {
             return false;
         }
-        if ($fen === $this->defaultFEN) {
+        if ($fen !== $this->defaultFEN) {
             $this->header['SetUp'] = '1';
             $this->header['FEN'] = $fen;
         } else {
