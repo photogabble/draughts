@@ -168,10 +168,4 @@ class DraughtsTest extends TestCase
             // @todo
         }
     }
-
-    public function testHistory()
-    {
-        $draughts = new Draughts();
-        // @todo
-    }
 }
