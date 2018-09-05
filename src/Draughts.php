@@ -507,27 +507,6 @@ class Draughts
     }
 
     /**
-     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L684
-     * @return array
-     * @throws \Exception
-     */
-    public function getMoves()
-    {
-        $moves = [];
-        $us = $this->turn;
-
-        for ($i = 1; $i < strlen($this->position); $i++) {
-            if ($this->position[$i] === $us || $this->position[$i] === strtolower($us)) {
-                $tempMoves = $this->movesAtSquare($i);
-                if (count($tempMoves) > 0) {
-                    $moves = array_merge($moves, $this->convertMoves($tempMoves, 'external'));
-                }
-            }
-        }
-        return $moves;
-    }
-
-    /**
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L666
      * @param int $index
      * @return array
@@ -675,9 +654,26 @@ class Draughts
         return $this->convertPosition($this->position, 'external');
     }
 
-    //
-    // PRIVATE BELOW
-    //
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L684
+     * @return array
+     * @throws \Exception
+     */
+    private function getMoves()
+    {
+        $moves = [];
+        $us = $this->turn;
+
+        for ($i = 1; $i < strlen($this->position); $i++) {
+            if ($this->position[$i] === $us || $this->position[$i] === strtolower($us)) {
+                $tempMoves = $this->movesAtSquare($i);
+                if (count($tempMoves) > 0) {
+                    $moves = array_merge($moves, $this->convertMoves($tempMoves, 'external'));
+                }
+            }
+        }
+        return $moves;
+    }
 
     /**
      * Called when the initial board setup is changed with put() or remove().
