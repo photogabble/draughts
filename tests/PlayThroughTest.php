@@ -15,13 +15,13 @@ class PlayThroughTest extends TestCase
     public function testRandomMatch()
     {
         $draughts = new Draughts();
-        echo $draughts->ascii(true);
+        //echo $draughts->ascii(true);
         while (!$draughts->gameOver())
         {
             $moves = $draughts->generateMoves();
             $move = $moves[array_rand($moves, 1)];
             $this->assertNotNull($draughts->move($move));
-            echo $draughts->ascii(true);
+            //echo $draughts->ascii(true);
         }
         $this->assertTrue($draughts->gameOver());
     }
