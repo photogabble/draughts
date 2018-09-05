@@ -157,15 +157,63 @@ class DraughtsTest extends TestCase
         // @todo
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testMakeMove()
     {
-        $positions = [];
+        $positions = [
+            [
+                'fen' => 'W:W31-50:B1-20',
+                'next' => '',
+                'captured' => [],
+                'move' => new Move(['from' => 17, 'to' => 22]),
+                'legal' => false
+            ],
+            [
+                'fen' => 'W:W31-50:B1-20',
+                'next' => '',
+                'captured' => [],
+                'move' => new Move(['from' => 31, 'to' => 36]),
+                'legal' => false
+            ],
+            [
+                'fen' => 'W:W31-50:B1-20',
+                'next' => '',
+                'captured' => [],
+                'move' => new Move(['from' => 20, 'to' => 15]),
+                'legal' => false
+            ],
+            [
+                'fen' => 'W:W31-50:B1-20',
+                'next' => 'B:W30,31,32,33,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20',
+                'captured' => [],
+                'move' => new Move(['from' => 34, 'to' => 30]),
+                'legal' => true
+            ],
+            [
+                'fen' => 'W:W30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,20,24',
+                'next' => '',
+                'captured' => [],
+                'move' => new Move(['from' => 30, 'to' => 19]),
+                'legal' => true
+            ],
+        ];
 
         foreach ($positions as $position) {
             $draughts = new Draughts();
             $draughts->load($position['fen']);
 
-            // @todo
+            $result = $draughts->move($position['move']);
+
+            if ($position['legal'] === true){
+                $this->assertNotNull($result);
+                $this->assertEquals($position['next'], $draughts->generateFen());
+                $this->assertEquals($position['captured'], $result->piecesCaptured);
+
+            } else {
+                $this->assertNull($result);
+            }
         }
     }
 }
