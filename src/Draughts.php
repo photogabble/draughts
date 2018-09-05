@@ -639,7 +639,7 @@ class Draughts
     {
         $moveHistory = [];
         foreach ($this->history as $item) {
-            $moveHistory = $item->history($verbose);
+            $moveHistory[] = $item->history($verbose);
         }
         return $moveHistory;
     }
