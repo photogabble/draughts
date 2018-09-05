@@ -18,16 +18,12 @@ class PlayThroughTest extends TestCase
         echo $draughts->ascii(true);
         while (!$draughts->gameOver())
         {
-            $moves = $draughts->getMoves();
+            $moves = $draughts->generateMoves();
             $move = $moves[array_rand($moves, 1)];
-            $r = $draughts->move($move);
-            if (is_null($r)){
-                $x = $draughts->generatePDN();
-                $n = 1;
-            }
-            $this->assertNotNull($r);
+            $this->assertNotNull($draughts->move($move));
             echo $draughts->ascii(true);
         }
+        $this->assertTrue($draughts->gameOver());
     }
 
     /**
@@ -50,11 +46,9 @@ class PlayThroughTest extends TestCase
             $this->assertNotNull($draughts->move($turn));
         }
 
-        $validTurns = $draughts->getMoves();
+        $validTurns = $draughts->generateMoves();
         // only two valid moves 19-28 and 18-29
         $this->assertCount(2, $validTurns);
-
-        $n = 1;
     }
 
     /**
