@@ -54,6 +54,9 @@ class DraughtsTest extends TestCase
 
     public function testPerft()
     {
+        $this->markTestIncomplete('');
+        return;
+
         $perfts = [];
 
         foreach ($perfts as $perft) {
@@ -91,6 +94,9 @@ class DraughtsTest extends TestCase
 
     public function testInsufficientMaterial()
     {
+        $this->markTestIncomplete('');
+        return;
+
         $positions = [];
 
         foreach ($positions as $position) {
@@ -107,6 +113,9 @@ class DraughtsTest extends TestCase
 
     public function testThreefoldRepetition()
     {
+        $this->markTestIncomplete('');
+        return;
+
         $positions = [];
 
         foreach ($positions as $position) {
@@ -114,7 +123,7 @@ class DraughtsTest extends TestCase
             $draughts->load($position['fen']);
             $passed = true;
             for ($j = 0; $j < count($position['moves']); $j++) {
-                if ($draughts->InThreefoldRepetition()) {
+                if ($draughts->inThreefoldRepetition()) {
                     $passed = false;
                     break;
                 }
