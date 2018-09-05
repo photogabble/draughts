@@ -144,7 +144,7 @@ class Draughts
     {
         if (is_null($fen) || $fen === $this->defaultFEN) {
             $this->position = $this->defaultPositionInternal;
-            // @todo update_setup(generate_fen(position))
+            $this->updateSetup($this->generateFen());
             return true;
         }
 
