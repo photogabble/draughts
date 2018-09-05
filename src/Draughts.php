@@ -218,10 +218,12 @@ class Draughts
     }
 
     /**
+     * Generate next valid moves.
      * Original source has this proxied as moves publicly.
+     *
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L643
      * @param null|int $square
-     * @return Move[]
+     * @return array|Move[]
      * @throws \Exception
      */
     public function generateMoves(int $square = null)
@@ -958,8 +960,7 @@ class Draughts
                 if (preg_match('/^[bw]0/', $str, $matchArray)) {
                     if ($this->validDir($piece, $dir) === true) { // validDir maybe shouldn't throw an exception?
                         $posTo = $posFrom + $this->steps[$dir];
-                        $moveObject = new Move(['from' => $posFrom, 'to' => $posTo, 'takes' => [], 'jumps' => []]);
-                        $moves[] = $moveObject;
+                        $moves[] = new Move(['from' => $posFrom, 'to' => $posTo, 'takes' => [], 'jumps' => []]);
                     }
                 }
             }
@@ -972,8 +973,7 @@ class Draughts
                 if (preg_match('/^[BW]0+/', $str, $matchArray)) {
                     for ($i = 1; $i < count($matchArray[0]); $i++) {
                         $posTo = $posFrom + ($i * $this->steps[$dir]);
-                        $moveObject = new Move(['from' => $posFrom, 'to' => $posTo, 'takes' => [], 'jumps' => []]);
-                        $moves[] = $moveObject;
+                        $moves[] = new Move(['from' => $posFrom, 'to' => $posTo, 'takes' => [], 'jumps' => []]);
                     }
                 }
             }
