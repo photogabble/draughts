@@ -21,7 +21,7 @@ $draughts = new Draughts();
 echo $draughts->ascii();
 while (!$draughts->gameOver())
 {
-    $moves = $draughts->getMoves();
+    $moves = $draughts->generateMoves();
     $move = $moves[array_rand($moves, 1)];
     $draughts->move($move);
     echo $draughts->ascii();
