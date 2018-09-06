@@ -60,8 +60,7 @@ class DraughtsTest extends TestCase
         $perfts = [];
 
         foreach ($perfts as $perft) {
-            $draughts = new Draughts();
-            $draughts->load($perft['fen']);
+            $draughts = new Draughts($perft['fen']);
             $nodes = $draughts->perft($perft['depth']);
             $this->assertEquals($perft['nodes'], $nodes);
         }
@@ -73,9 +72,7 @@ class DraughtsTest extends TestCase
         $positions = [];
 
         foreach ($positions as $position) {
-            $draughts = new Draughts();
-            $draughts->load($position['fen']);
-
+            $draughts = new Draughts($position['fen']);
 
             $moves = $draughts->moves(['square' => $position['square'], 'verbose' =>  $position['verbose']]);
             $passed = count($position['moves']) === count($moves);
@@ -102,8 +99,7 @@ class DraughtsTest extends TestCase
         $positions = [];
 
         foreach ($positions as $position) {
-            $draughts = new Draughts();
-            $draughts->load($position['fen']);
+            $draughts = new Draughts($position['fen']);
 
             if ($position['draw']) {
                 $this->assertTrue($draughts->insufficientMaterial() && $draughts->inDraw());
@@ -121,8 +117,7 @@ class DraughtsTest extends TestCase
         $positions = [];
 
         foreach ($positions as $position) {
-            $draughts = new Draughts();
-            $draughts->load($position['fen']);
+            $draughts = new Draughts($position['fen']);
             $passed = true;
             for ($j = 0; $j < count($position['moves']); $j++) {
                 if ($draughts->inThreefoldRepetition()) {
@@ -203,8 +198,7 @@ class DraughtsTest extends TestCase
         ];
 
         foreach ($positions as $position) {
-            $draughts = new Draughts();
-            $draughts->load($position['fen']);
+            $draughts = new Draughts($position['fen']);
             $result = $draughts->move($position['move']);
 
             if ($position['legal'] === true){

@@ -34,7 +34,7 @@ while (!$draughts->gameOver())
 
 ### Constructor
 
-The `Draughts` class `__construct` method takes an optional `string` parameter that defined the initial board configuration in [Forsyth-Edwards Notation](https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation).
+The `Draughts` class `__construct` method takes an optional `string` parameter that defines the initial board configuration in [Forsyth-Edwards Notation](https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation).
 
 ```php
 // Board defaults to the starting position when call with no parameter
@@ -43,6 +43,10 @@ $draughts = new Draughts;
 // Pass in a FEN string to load a particular position
 $draughts = new Draughts('W:W31-50:B1-20');
 ```
+
+### Load
+
+The load method takes an optional `string` parameter that defines the initial board configuration in [Forsyth-Edwards Notation](https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation). This is called by `__construct` and shouldn't be needed.
 
 ## Not invented here
 

@@ -135,84 +135,6 @@ class Draughts
     }
 
     /**
-     * Load board state from Forsyth-Edwards Notation (FEN.)
-     *
-     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L126
-     * @see https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
-     * @param null|string $fen
-     * @return bool
-     * @throws \Exception
-     */
-    public function load(string $fen = null): bool
-    {
-        if (is_null($fen) || $fen === $this->defaultFEN) {
-            $this->position = $this->defaultPositionInternal;
-            $this->updateSetup($this->generateFen());
-            return true;
-        }
-
-        // fen_constants(dimension) //TODO for empty fens
-
-        $checkedFen = $this->validateFen($fen);
-        if (!$checkedFen->isValid()) {
-            throw new \Exception($checkedFen->error);
-        }
-
-        $this->clear();
-
-        // The validator has already removed spaces and suffixes.
-        // So no need to repeat that here.
-        $fen = $checkedFen->fen;
-
-        $tokens = explode(':', $fen);
-
-        // Which side to move
-        $this->turn = substr($tokens[0], 0, 1);
-
-        // Positions
-        $externalPosition = $this->defaultPositionExternal;
-
-        // Zero out default
-        for ($i = 1; $i <= strlen($externalPosition); $i++) {
-            $externalPosition = $this->setCharAt($externalPosition, $i, 0);
-        }
-
-        $externalPosition = $this->setCharAt($externalPosition, 0, $this->turn);
-
-        // @todo refactor
-        for ($k = 1; $k <= 2; $k++) {
-            // @todo called twice
-            $colour = substr($tokens[$k], 0, 1);
-            $sideString = substr($tokens[$k], 1);
-            if (strlen($sideString) === 0) {
-                continue;
-            }
-            $numbers = explode(',', $sideString);
-            for ($i = 0; $i < count($numbers); $i++) {
-                $numSquare = $numbers[$i];
-                $isKing = substr($numSquare, 0, 1) === 'K';
-                $numSquare = ($isKing === true ? substr($numSquare, 1) : $numSquare); // Strips K
-                $range = explode('-', $numSquare);
-                if (count($range) === 2) {
-                    $from = (int)$range[0];
-                    $to = (int)$range[1];
-                    for ($j = $from; $j <= $to; $j++) {
-                        $externalPosition = $this->setCharAt($externalPosition, $j, ($isKing === true ? strtoupper($colour) : strtolower($colour)));
-                    }
-                } else {
-                    $numSquare = (int)$numSquare;
-                    $externalPosition = $this->setCharAt($externalPosition, $numSquare, ($isKing === true ? strtoupper($colour) : strtolower($colour)));
-                }
-            }
-        }
-
-        $this->position = $this->convertPosition($externalPosition, 'internal');
-        $this->updateSetup($this->generateFen());
-
-        return true;
-    }
-
-    /**
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L122
      * @throws \Exception
      */
@@ -677,6 +599,84 @@ class Draughts
             }
         }
         return $moves;
+    }
+
+    /**
+     * Load board state from Forsyth-Edwards Notation (FEN.)
+     *
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L126
+     * @see https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+     * @param null|string $fen
+     * @return bool
+     * @throws \Exception
+     */
+    private function load(string $fen = null): bool
+    {
+        if (is_null($fen) || $fen === $this->defaultFEN) {
+            $this->position = $this->defaultPositionInternal;
+            $this->updateSetup($this->generateFen());
+            return true;
+        }
+
+        // fen_constants(dimension) //TODO for empty fens
+
+        $checkedFen = $this->validateFen($fen);
+        if (!$checkedFen->isValid()) {
+            throw new \Exception($checkedFen->error);
+        }
+
+        $this->clear();
+
+        // The validator has already removed spaces and suffixes.
+        // So no need to repeat that here.
+        $fen = $checkedFen->fen;
+
+        $tokens = explode(':', $fen);
+
+        // Which side to move
+        $this->turn = substr($tokens[0], 0, 1);
+
+        // Positions
+        $externalPosition = $this->defaultPositionExternal;
+
+        // Zero out default
+        for ($i = 1; $i <= strlen($externalPosition); $i++) {
+            $externalPosition = $this->setCharAt($externalPosition, $i, 0);
+        }
+
+        $externalPosition = $this->setCharAt($externalPosition, 0, $this->turn);
+
+        // @todo refactor
+        for ($k = 1; $k <= 2; $k++) {
+            // @todo called twice
+            $colour = substr($tokens[$k], 0, 1);
+            $sideString = substr($tokens[$k], 1);
+            if (strlen($sideString) === 0) {
+                continue;
+            }
+            $numbers = explode(',', $sideString);
+            for ($i = 0; $i < count($numbers); $i++) {
+                $numSquare = $numbers[$i];
+                $isKing = substr($numSquare, 0, 1) === 'K';
+                $numSquare = ($isKing === true ? substr($numSquare, 1) : $numSquare); // Strips K
+                $range = explode('-', $numSquare);
+                if (count($range) === 2) {
+                    $from = (int)$range[0];
+                    $to = (int)$range[1];
+                    for ($j = $from; $j <= $to; $j++) {
+                        $externalPosition = $this->setCharAt($externalPosition, $j, ($isKing === true ? strtoupper($colour) : strtolower($colour)));
+                    }
+                } else {
+                    $numSquare = (int)$numSquare;
+                    $externalPosition = $this->setCharAt($externalPosition, $numSquare, ($isKing === true ? strtoupper($colour) : strtolower($colour)));
+                }
+            }
+        }
+
+        $this->position = $this->convertPosition($externalPosition, 'internal');
+        $this->updateSetup($this->generateFen());
+
+        return true;
     }
 
     /**
