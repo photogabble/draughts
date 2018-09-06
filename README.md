@@ -61,11 +61,11 @@ Returns `true` if the game has ended via no moves left, or no pieces rule. Other
 
 ### inDraw(): bool
 
-Under development, see issue #4
+Under development, see issue [#4](https://github.com/photogabble/draughts/issues/4)
 
 ### inThreefoldRepetition()
 
-Under development, see issue #5
+Under development, see issue [#5](https://github.com/photogabble/draughts/issues/5)
 
 ### move(Move $move): ?Move
 
