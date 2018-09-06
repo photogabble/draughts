@@ -486,19 +486,6 @@ class Draughts
     }
 
     /**
-     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L113
-     */
-    public function clear()
-    {
-        $this->position = $this->defaultPositionInternal;
-        $this->turn = self::WHITE;
-        $this->moveNumber = 1;
-        $this->history = [];
-        $this->header = [];
-        $this->updateSetup($this->generateFen());
-    }
-
-    /**
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L598
      * @param string $piece
      * @param int $square
@@ -677,6 +664,19 @@ class Draughts
         $this->updateSetup($this->generateFen());
 
         return true;
+    }
+
+    /**
+     * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L113
+     */
+    private function clear()
+    {
+        $this->position = $this->defaultPositionInternal;
+        $this->turn = self::WHITE;
+        $this->moveNumber = 1;
+        $this->history = [];
+        $this->header = [];
+        $this->updateSetup($this->generateFen());
     }
 
     /**
