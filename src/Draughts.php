@@ -152,7 +152,7 @@ class Draughts
      * @return array|Move[]
      * @throws \Exception
      */
-    public function generateMoves(int $square = null)
+    public function generateMoves(int $square = null): array
     {
         if (!is_null($square)) {
             $moves = $this->getLegalMoves($square);
@@ -423,7 +423,7 @@ class Draughts
     public function move(Move $move): ?Move
     {
         $moves = $this->generateMoves();
-        foreach ($moves as $gMove){
+        foreach ($moves as $gMove) {
             if (($move->to === $gMove->to) && ($move->from === $gMove->from)) {
                 $this->makeMove($gMove);
                 return $gMove;
@@ -453,8 +453,9 @@ class Draughts
 
     /**
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L868
+     * @return null|Move
      */
-    public function undo()
+    public function undo(): ?Move
     {
         if (!$old = array_pop($this->history)) {
             return null;
@@ -523,7 +524,7 @@ class Draughts
      * @param int $square
      * @return string
      */
-    public function remove(int $square):string
+    public function remove(int $square): string
     {
         $piece = $this->get($square);
         $this->position = $this->setCharAt($this->position, $this->convertNumber($square, 'internal'), 0);
@@ -995,14 +996,13 @@ class Draughts
             return $tempMoves;
         }
 
-        foreach($moves as $move){
+        foreach ($moves as $move) {
             $moveObject = new Move(['jumps' => [], 'takes' => []]);
             $moveObject->from = $this->convertNumber($move->from, $type);
-            foreach($move->jumps as $j => $jump) {
+            foreach ($move->jumps as $j => $jump) {
                 $moveObject->jumps[$j] = $this->convertNumber($jump, $type);
             }
-            foreach ($move->takes as $j => $take)
-            {
+            foreach ($move->takes as $j => $take) {
                 $moveObject->takes[$j] = $this->convertNumber($take, $type);
             }
 
