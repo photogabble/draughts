@@ -13,9 +13,9 @@ A PHP checkers library for move generation/validation, piece placement/movement 
 
 Install using composer: `compoer require photogabble/draughts`
 
-## Usage
+## Example Usage
 
-The code below will play a complete game of draughts with each move being picked randomly:
+The code below will play a complete game of draughts, outputting the result of each move with each move being picked randomly:
 
 ```php
 $draughts = new Draughts();
@@ -27,6 +27,20 @@ while (!$draughts->gameOver())
     $draughts->move($move);
     echo $draughts->ascii();
 }
+```
+
+## Public API
+
+### Constructor
+
+The `Draughts` class `__construct` method takes an optional `string` parameter that defined the initial board configuration in [Forsyth-Edwards Notation](https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation).
+
+```php
+// Board defaults to the starting position when call with no parameter
+$draughts = new Draughts;
+
+// Pass in a FEN string to load a particular position
+$draughts = new Draughts('W:W31-50:B1-20');
 ```
 
 ## Not invented here
