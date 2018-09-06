@@ -12,7 +12,7 @@ A PHP checkers library for move generation/validation, piece placement/movement 
 
 ## Install
 
-Install using composer: `compoer require photogabble/draughts`
+Install using composer: `composer require photogabble/draughts`
 
 ## Example Usage
 
