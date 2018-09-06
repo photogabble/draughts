@@ -135,7 +135,10 @@ class Draughts
     }
 
     /**
+     * Load board state from Forsyth-Edwards Notation (FEN.)
+     *
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L126
+     * @see https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
      * @param null|string $fen
      * @return bool
      * @throws \Exception
