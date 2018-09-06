@@ -54,7 +54,7 @@ class DraughtsTest extends TestCase
 
     public function testPerft()
     {
-        $this->markTestIncomplete('');
+        $this->markTestIncomplete('Not yet implemented');
         return;
 
         $perfts = [];
@@ -69,6 +69,7 @@ class DraughtsTest extends TestCase
 
     public function testSingleSquareMoveGeneration()
     {
+        $this->markTestIncomplete('Not yet implemented');
         $positions = [];
 
         foreach ($positions as $position) {
@@ -94,6 +95,7 @@ class DraughtsTest extends TestCase
 
     public function testInsufficientMaterial()
     {
+        $this->markTestIncomplete('Not yet implemented');
         $this->markTestIncomplete('');
         return;
 
@@ -136,25 +138,25 @@ class DraughtsTest extends TestCase
 
     public function testGetPutRemove()
     {
+        $this->markTestIncomplete('Not yet implemented');
         $draughts = new Draughts();
         // @todo
     }
 
-    public function testFEN()
-    {
-        $positions = [];
-
-        foreach ($positions as $position) {
-            $draughts = new Draughts();
-            $draughts->load($position['fen']);
-            $this->assertEquals($position['should_pass'], $draughts->fen() == $position['fen']);
-        }
-    }
-
+    /**
+     * Written for issue #7
+     * @see https://github.com/carbontwelve/draughts/issues/7
+     * @throws \Exception
+     */
     public function testLoadFEN()
     {
         $draughts = new Draughts();
-        // @todo
+        $draughts->move(new Move(['from' => 35, 'to' => 30]));
+        $fen = $draughts->generateFen();
+        $this->assertEquals('B:W30,31,32,33,34,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20', $fen);
+
+        $draughts = new Draughts($fen);
+        $this->assertEquals($fen, $draughts->generateFen());
     }
 
     /**
@@ -163,38 +165,37 @@ class DraughtsTest extends TestCase
     public function testMakeMove()
     {
         $positions = [
-            // Disabled for issue #7, re-enable as part of that issue
-//            [
-//                'fen' => 'W:W31-50:B1-20',
-//                'next' => '',
-//                'captured' => [],
-//                'move' => new Move(['from' => 17, 'to' => 22]),
-//                'legal' => false
-//            ],
-//            [
-//                'fen' => 'W:W31-50:B1-20',
-//                'next' => '',
-//                'captured' => [],
-//                'move' => new Move(['from' => 31, 'to' => 36]),
-//                'legal' => false
-//            ],
-//            [
-//                'fen' => 'W:W31-50:B1-20',
-//                'next' => '',
-//                'captured' => [],
-//                'move' => new Move(['from' => 20, 'to' => 15]),
-//                'legal' => false
-//            ],
-//            [
-//                'fen' => 'W:W31-50:B1-20',
-//                'next' => 'B:W30,31,32,33,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20',
-//                'captured' => [],
-//                'move' => new Move(['from' => 34, 'to' => 30]),
-//                'legal' => true
-//            ],
+            [
+                'fen' => 'W:W31-50:B1-20',
+                'next' => '',
+                'captured' => [],
+                'move' => new Move(['from' => 17, 'to' => 22]),
+                'legal' => false
+            ],
+            [
+                'fen' => 'W:W31-50:B1-20',
+                'next' => '',
+                'captured' => [],
+                'move' => new Move(['from' => 31, 'to' => 36]),
+                'legal' => false
+            ],
+            [
+                'fen' => 'W:W31-50:B1-20',
+                'next' => '',
+                'captured' => [],
+                'move' => new Move(['from' => 20, 'to' => 15]),
+                'legal' => false
+            ],
+            [
+                'fen' => 'W:W31-50:B1-20',
+                'next' => 'B:W30,31,32,33,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20',
+                'captured' => [],
+                'move' => new Move(['from' => 34, 'to' => 30]),
+                'legal' => true
+            ],
             [
                 'fen' => 'W:W30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,20,24',
-                'next' => '',
+                'next' => 'B:W19,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,20',
                 'captured' => [24],
                 'move' => new Move(['from' => 30, 'to' => 19]),
                 'legal' => true
@@ -204,13 +205,12 @@ class DraughtsTest extends TestCase
         foreach ($positions as $position) {
             $draughts = new Draughts();
             $draughts->load($position['fen']);
-
             $result = $draughts->move($position['move']);
 
             if ($position['legal'] === true){
                 $this->assertNotNull($result);
                 $this->assertEquals($position['next'], $draughts->generateFen());
-                $this->assertEquals($position['captured'], $result->piecesCaptured);
+                $this->assertEquals($position['captured'], $result->captures);
 
             } else {
                 $this->assertNull($result);

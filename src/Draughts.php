@@ -169,8 +169,9 @@ class Draughts
         // Positions
         $externalPosition = $this->defaultPositionExternal;
 
+        // Zero out default
         for ($i = 1; $i <= strlen($externalPosition); $i++) {
-            $externalPosition = $this->setCharAt($externalPosition, 1, 0);
+            $externalPosition = $this->setCharAt($externalPosition, $i, 0);
         }
 
         $externalPosition = $this->setCharAt($externalPosition, 0, $this->turn);
