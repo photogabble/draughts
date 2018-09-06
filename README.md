@@ -2,6 +2,7 @@
 <p align="center"><em>A PHP port of <a href="https://github.com/shubhendusaurabh/draughts.js">draughts.js</a></em></p>
 
 <p align="center">
+  <a href="https://travis-ci.org/photogabble/draughts"><img src="https://travis-ci.org/photogabble/draughts.svg?branch=master" alt="Build Status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/photogabble/php-confusable-homoglyphs.svg" alt="License"></a>
   <a href="https://gitmoji.carloscuesta.me/"><img src="https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg" alt="Gitmoji"></a>
 </p>
