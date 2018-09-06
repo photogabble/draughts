@@ -30,4 +30,4 @@ while (!$draughts->gameOver())
 
 ## Not invented here
 
-This is a port of [shubhendusaurabh/draughts.js](https://github.com/shubhendusaurabh/draughts.js) to PHP.
+This started as a PHP port of [shubhendusaurabh/draughts.js](https://github.com/shubhendusaurabh/draughts.js).
