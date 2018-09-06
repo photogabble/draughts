@@ -208,17 +208,6 @@ class Draughts
     }
 
     /**
-     * Original source has this proxied as a public method validate_fen.
-     *
-     * @param string $fen
-     * @return FenValidator
-     */
-    public function validateFen(string $fen): FenValidator
-    {
-        return new FenValidator($fen);
-    }
-
-    /**
      * Original source has this proxied as a public method fen.
      *
      * @see https://github.com/shubhendusaurabh/draughts.js/blob/master/draughts.js#L306
@@ -566,6 +555,17 @@ class Draughts
     public function getPosition(): string
     {
         return $this->convertPosition($this->position, 'external');
+    }
+
+    /**
+     * Original source has this proxied as a public method validate_fen.
+     *
+     * @param string $fen
+     * @return FenValidator
+     */
+    private function validateFen(string $fen): FenValidator
+    {
+        return new FenValidator($fen);
     }
 
     /**
