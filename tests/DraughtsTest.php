@@ -211,4 +211,21 @@ class DraughtsTest extends TestCase
             }
         }
     }
+
+    public function testSetHeaders()
+    {
+    	$draughts = new Draughts();
+
+    	$headers = [
+    		'X-Powered-By' => 'Draughts',
+		    'version' => '1.0.0'
+	    ];
+
+    	$currentHeaders = $draughts->setHeader($headers);
+
+    	$this->assertAttributeNotEmpty('header', $draughts);
+    	$this->assertEquals('Draughts', $currentHeaders['X-Powered-By']);
+    	$this->assertEquals('1.0.0', $currentHeaders['version']);
+    }
+
 }
