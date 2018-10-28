@@ -131,13 +131,6 @@ class DraughtsTest extends TestCase
         }
     }
 
-    public function testGetPutRemove()
-    {
-        $this->markTestIncomplete('Not yet implemented');
-        $draughts = new Draughts();
-        // @todo
-    }
-
     /**
      * Written for issue #7
      * @see https://github.com/carbontwelve/draughts/issues/7
@@ -210,5 +203,29 @@ class DraughtsTest extends TestCase
                 $this->assertNull($result);
             }
         }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testPuts() {
+        $draughts = new Draughts;
+        $return = $draughts->put('foo', 1);
+        $this->assertFalse($return);
+
+        $return = $draughts->put('bwBW', 1);
+        $this->assertFalse($return);
+
+        $return = $draughts->put('bwBW', 10);
+        $this->assertFalse($return);
+
+        $return = $draughts->put('bwBW', 0);
+        $getReturn = $draughts->get(60);
+
+        $this->assertEquals('b', $getReturn);
+        $this->assertTrue($return);
+
+        $return = $draughts->remove( 0);
+        $this->assertEquals('-', $return);
     }
 }
