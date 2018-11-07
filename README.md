@@ -8,7 +8,7 @@
 </p>
 
 ## About this package
-A PHP checkers library for move generation/validation, piece placement/movement and draw detection. Useful for writing the server side implementation of a multi-player checkers game. It has been ported from a JavaScript implementation by [@shubhendusaurabh](https://github.com/shubhendusaurabh).
+A PHP checkers library for move generation/validation, piece placement/movement and draw detection. Useful for writing the server side implementation of a multi-player checkers game. It has been ported from a JavaScript implementation by [@shubhendusaurabh](https://github.com/shubhendusaurabh). You can see a list of the contributors to this project [here](CONTRIBUTORS.md).
 
 ## Install
 
