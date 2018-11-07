@@ -5,6 +5,7 @@ namespace Photogabble\Draughts\Tests;
 use Photogabble\Draughts\Draughts;
 use Photogabble\Draughts\Move;
 use PHPUnit\Framework\TestCase;
+use ReflectionObject;
 
 class DraughtsTest extends TestCase
 {
@@ -210,5 +211,28 @@ class DraughtsTest extends TestCase
                 $this->assertNull($result);
             }
         }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testSettingHeaders() {
+        $draughts = new Draughts;
+        $draughts->setHeader([
+            'foo' => 'bar',
+            'baz' => 'qez',
+        ]);
+
+        $draughtsReflection = new ReflectionObject($draughts);
+        $headerProperty = $draughtsReflection->getProperty( 'header' );
+        $headerProperty->setAccessible( true );
+
+        $headers = $headerProperty->getValue($draughts);
+
+        $this->assertArrayHasKey('foo', $headers);
+        $this->assertArrayHasKey('baz', $headers);
+
+        $this->assertEquals($headers['foo'], 'bar');
+        $this->assertEquals($headers['baz'], 'qez');
     }
 }
