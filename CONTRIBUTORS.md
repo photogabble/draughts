@@ -5,14 +5,14 @@
 * Simon Dann <simon.dann@gmail.com>
   * Porting from JavaScript to PHP
   
-* Shubhendu <@shubhendusaurabh>
+* Shubhendu <[@shubhendusaurabh](https://github.com/shubhendusaurabh)>
   * [draughts.js](https://github.com/shubhendusaurabh/draughts.js) author
 
 ## Contributors
 
 In chronological order:
 
-* [Marco Rieger] <@ins0>
+* Marco Rieger <[@ins0](https://github.com/ins0)>
   * Increasing Unit Test coverage
 
 * [Your name or handle] <[email or website]>
