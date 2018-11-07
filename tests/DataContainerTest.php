@@ -22,6 +22,16 @@ class DataContainerTest extends TestCase
 
         $this->assertEquals('hello', $clone->to);
         $this->assertNull($move->to);
+
+        $move = new Move([
+            'dontExists' => 'foo',
+            'jumps' => 'bar',
+        ]);
+
+        $this->assertTrue(property_exists($move, 'jumps'));
+        $this->assertEquals($move->jumps, 'bar');
+
+        $this->assertFalse(property_exists($move, 'dontExists'));
     }
 
     public function testCaptureStateClass()
