@@ -29,6 +29,9 @@ while (!$draughts->gameOver())
     echo $draughts->ascii();
 }
 ```
+### PDN Viewer
+
+During my time developing this port I have found this [PDN Viewer](http://svg_experimenten.deds.nl/draughtboard2/pdn_viewer_a.html) to be invaluable at helping me understand the PDN structure and as a visual debugger of the PDN that this library generates.
 
 ## Public API
 
